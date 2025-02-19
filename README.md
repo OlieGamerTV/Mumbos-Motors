@@ -10,9 +10,11 @@ Allows vehicle editing and importing, custom textures, resizing of CAFF data sec
 Has a variety of uses primarily for automating file asset viewing and extraction in nuts and bolts.
 Perfect for modding, but buggy. Make back ups as needed!
 
-## Drag and Drop only
-currently only supports drag n drop
+## Drag and Drop & Open With
+supports both drag & drop and opening the file with the executable
 ![Drag n Drop Files](https://i.imgur.com/lgXYStk.png)
+## Loctext Viewer (Debug/11 or loctext for other languages)
+Load in any loctext file and view strings with their corresponding dialogue tag.
 ## Tag viewer
 allows tags to be seen and ready for modding
 ![Tags](https://i.imgur.com/vyCcSM0.png)
@@ -24,7 +26,7 @@ search for any assets as necessary and view all textures supporting formats 0x52
 multi CAFF are any files in bundle/50. They are multiple CAFF files packed into one large asset. They are moddable as well
 ![Multi-CAFF are files in the 50 folder](https://i.imgur.com/LKupqt2.png)
 ## Music Extractor (bundle/50/685374)
-music formats in .xwb. Requires xmash and towave to decode and listen
+music formats in .xwb. Either use foobar2000 or use xmash and towave to decode and listen
 ![Music](https://i.imgur.com/lhCANG1.png)
 ## Mod vehicle crate contents
 located in bundle/50/685374. 0x00 part count 0x04 part ident
