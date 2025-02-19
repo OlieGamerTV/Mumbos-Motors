@@ -36,7 +36,10 @@ namespace Mumbos_Motors
 
         public void ForceLoadFile(string filename)
         {
-            addTab_Main_File(filename);
+            if(File.Exists(filename))
+            {
+                addTab_Main_File(filename);
+            }
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
@@ -59,7 +62,10 @@ namespace Mumbos_Motors
         {
             for (int i = 0; i < fileNames.Length; i++)
             {
-                addTab_Main_File(fileNames[i]);
+                if (File.Exists(fileNames[i]))
+                {
+                    addTab_Main_File(fileNames[i]);
+                }
             }
         }
 
