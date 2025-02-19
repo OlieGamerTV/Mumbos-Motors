@@ -153,21 +153,18 @@ namespace Mumbos_Motors
             {
                 string tempStr = "";
                 char temp = '\0';
-                reader.ReadChar();
-                if (s == 1) reader.ReadChar(); //Skip an extra blank char.
-                while (readChars < stringLengthTotalTable[i])
+                //reader.ReadChar();
+                //if (s == 1) reader.ReadChar(); //Skip an extra blank char.
+                while (readChars < stringLengthTotalTable[i] * 2)
                 {
-                    if((temp = reader.ReadChar()) != '\0')
-                    {
-                        tempStr += temp;
-                        reader.ReadChar();
-                    }
+                    temp = reader.ReadChar();
+                    tempStr += temp;
                     readChars++;
                 }
-                Console.WriteLine(tempStr + " - " + stringLengthTotalTable[i]);
-                locStrings[i] = tempStr;
+                locStrings[i] = tempStr.Replace("\0", "");
+                Console.WriteLine(locStrings[i] + " - " + stringLengthTotalTable[i]);
                 MetaBlock_Combo_Custom("String:", 1, 0, 0, STRING_NODE, i);
-                SetupStringTab(tempStr);
+                SetupStringTab(locStrings[i]);
             }
 
             // Bulk Read the tags and add them to the node list.

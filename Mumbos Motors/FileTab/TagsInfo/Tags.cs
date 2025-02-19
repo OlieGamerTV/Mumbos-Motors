@@ -105,6 +105,21 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     moddingTab = new loctext(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
                                                     break;
                                                 }
+                                            case "misc":
+                                                {
+                                                    string miscCheck = DataMethods.getNameOfSymbol(tabName, 0x10, 0);
+                                                    Console.WriteLine("miscCheck");
+                                                    switch (miscCheck)
+                                                    {
+                                                        case "blockset":
+                                                            moddingTab = new misc_blockset(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                            break;
+                                                        default:
+                                                            moddingTab = new Default(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                            break;
+                                                    }
+                                                    break;
+                                                }
                                             default:
                                                 {
                                                     moddingTab = new Default(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
@@ -138,6 +153,26 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                             case "vehicle":
                                                 {
                                                     moddingTab = new vehicle(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                    break;
+                                                }
+                                            case "loctext":
+                                                {
+                                                    moddingTab = new loctext(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                    break;
+                                                }
+                                            case "misc":
+                                                {
+                                                    string miscCheck = DataMethods.getNameOfSymbol(tabName, 0x10, 0);
+                                                    Console.WriteLine("miscCheck");
+                                                    switch (miscCheck)
+                                                    {
+                                                        case "blockset":
+                                                            moddingTab = new misc_blockset(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                            break;
+                                                        default:
+                                                            moddingTab = new Default(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                            break;
+                                                    }
                                                     break;
                                                 }
                                             default:
