@@ -144,11 +144,15 @@ namespace Mumbos_Motors
             metaTab.buildMetaBlock_ComboRef_Custom(title, section, offs, len, nodename, index);
         }
 
-        public void MetaBock_String(string title, int section, int offs, int len)
+        public void MetaBlock_String(string title, int section, string body)
+        {
+            metaTab.buildMetaBlock_String(title, section, body);
+        }
+        public void MetaBlock_String(string title, int section, int offs, int len)
         {
             metaTab.buildMetaBlock_String(title, section, offs, len);
         }
-        public void MetaBLock_String(string title, int section, int offs, int len, string nodename, int index)
+        public void MetaBlock_String(string title, int section, int offs, int len, string nodename, int index)
         {
             metaTab.buildMetaBlock_String(title, section, offs, len, nodename, index);
         }

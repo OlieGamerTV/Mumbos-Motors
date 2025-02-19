@@ -17,7 +17,6 @@ namespace Mumbos_Motors.MetaInfo
         {
             this.offs = offs;
             this.len = len;
-
             design();
         }
 

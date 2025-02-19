@@ -46,6 +46,7 @@ namespace Mumbos_Motors
             {
                 case 0x43414646: //CAFF
                     {
+                        Form.decompAttempts = 0;
                         caff = new CAFF(dir);
                         TabPage_mainpage = new TabPage();
                         TabPage_mainpage.Text = fileName + "        ";
@@ -64,6 +65,7 @@ namespace Mumbos_Motors
 
                 case 0x438CB47C: //MULTICAFF
                     {
+                        Form.decompAttempts = 0;
                         multiCAFF = new MULTICAFF(dir);
                         TabPage_mainpage = new TabPage();
                         TabPage_mainpage.Text = fileName + "        ";
@@ -80,7 +82,7 @@ namespace Mumbos_Motors
                         break;
                     }
 
-                case 267719405: //XB COMPRESSED FILE
+                case 0xFF512ED: //XB COMPRESSED FILE
                     {
                         string xboxPath = Environment.ExpandEnvironmentVariables("%XEDK%");
 
@@ -99,6 +101,7 @@ namespace Mumbos_Motors
                         }
                         else //Path is valid in which case we want to decompress the file and force the Form to load it.
                         {
+                            Form.decompAttempts += 1;
                             error = true; ;
                             string fullPath = xboxPath + "\\bin\\win32\\xbdecompress.exe";
 
@@ -115,24 +118,42 @@ namespace Mumbos_Motors
                             We wait until the file has been decompressed, 
                             Might want to add a failsafe here but from my testing as long as you close the xbdecompress.exe cmd, Mumbo should be fine.. 
                             */
+
                             while (!p.HasExited)
                             {
-                                
                             }
 
-                            error = true; ;
-                            caff = new CAFF(dir);
+                            Console.WriteLine($"EXIT CODE {p.ExitCode}");
 
-                            //Set the new Dir to the decompressed file
-                            newDir += "_decompressed";
-
-                            //If the file Exist aka if xbdecompress.exe did its job, then we load up the file.
-                            if (File.Exists(newDir))
+                            if(p.ExitCode == 0)
                             {
+                                Form.decompAttempts = 0;
+                                error = true; ;
+
+                                newDir += "_decompressed";
                                 Form.ForceLoadFile(newDir);
                             }
+                            else if(p.ExitCode == 1)
+                            {
+                                if(Form.decompAttempts > 30)
+                                {
+                                    MessageBox.Show("Error opening: " + Path.GetFileName(fileName) + "\n" + DataMethods.readString(dir, 0x0, 0x4));
+                                    Form.decompAttempts = 0;
+                                }
+                                else
+                                {
+                                    Form.ForceLoadFile(newDir);
+                                }
+                            }
+                            //error = true; ;
+                            //caff = new CAFF(dir);
 
-                             break;
+                            //Set the new Dir to the decompressed file
+                            //newDir += "_decompressed";
+
+                            //If the file Exist aka if xbdecompress.exe did its job, then we load up the file.
+
+                            break;
                         }
 
                         //Xbox Path was Valid but HUH

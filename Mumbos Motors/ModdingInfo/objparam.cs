@@ -106,7 +106,7 @@ namespace Mumbos_Motors
             nodeTitle = "Vehicleblock";
             createNode(nodeTitle, 1);
             MetaBlock_Combo("Model", catagory, subCatagory, 1, 0x124, 0x4, nodeTitle, 0);
-            MetaBLock_String("Color", 1, 0x130, 0x20, nodeTitle, 0);
+            MetaBlock_String("Color", 1, 0x130, 0x20, nodeTitle, 0);
         }
         public void determineSubCatagory()
         {

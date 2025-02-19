@@ -92,6 +92,7 @@
     <Compile Include="MetaInfo\MetaNode.cs" />
     <Compile Include="MetaInfo\MetaTab.cs" />
     <Compile Include="MetaInfo\tagref_custom.cs" />
+    <Compile Include="ModdingInfo\loctext.cs" />
     <Compile Include="ModdingInfo\ModdingTab.cs" />
     <Compile Include="ModdingInfo\default.cs" />
     <Compile Include="ModdingInfo\model.cs" />

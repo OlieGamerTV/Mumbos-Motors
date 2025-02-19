@@ -19,10 +19,19 @@ namespace Mumbos_Motors
         private List<FilePage> toolBars = new List<FilePage>();
         private List<string> openTabNames = new List<string>();
 
+        public int decompAttempts = 0;
+
         public Form1()
         {
             InitializeComponent();
             createStartPage();
+        }
+
+        public Form1(string[] args)
+        {
+            InitializeComponent();
+            createStartPage();
+            createFilePages(args);
         }
 
         public void ForceLoadFile(string filename)

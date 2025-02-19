@@ -178,6 +178,23 @@ namespace Mumbos_Motors.MetaInfo
             {
                 block.textBox.Text = DataMethods.readFloat(block.textBox.Text) + "";
             }
+            else if (format == 3)
+            {
+                byte[] data = new byte[len];
+                Array.ConstrainedCopy(sectionData[block.section - 1], offs, data, 0, len);
+
+                block.textBox.Text = DataMethods.readInt(DataMethods.swapEndianness(data, len), 0, len) + "";
+            }
+            else if (format == 4)
+            {
+                byte[] data = new byte[len];
+                Array.ConstrainedCopy(sectionData[block.section - 1], offs, data, 0, len);
+
+                block.textBox.Text = DataMethods.readInt(DataMethods.swapEndianness(data, len), 0, len) + "";
+
+                block.textBox.Text = Convert.ToInt32(block.textBox.Text).ToString("X" + (2 * len));
+                block.textBox.MaxLength = 2 * len;
+            }
             block.textBox.TextChanged += new EventHandler(MetaBlock_Text_update);
 
             metaBlockTexts.Add(block);
@@ -301,6 +318,18 @@ namespace Mumbos_Motors.MetaInfo
             addMetaToNode(createBlock_ComboRef_Custom(title, section, offs, len), nodename, index);
         }
 
+        public MetaBlock_string createBlock_String(string title, int section, string body)
+        {
+            MetaBlock_string block = new MetaBlock_string(title, section, 0, body.Length);
+            block.textBox.Name = (section - 1) + " " + metaStrings.Count;
+            block.textBox.Text = body;
+            block.textBox.MaxLength = body.Length;
+            block.textBox.TextChanged += new EventHandler(MetaBlock_String_update);
+
+            metaStrings.Add(block);
+            return block;
+        }
+
         public MetaBlock_string createBlock_String(string title, int section, int offs, int len)
         {
             MetaBlock_string block = new MetaBlock_string(title, section, offs, len);
@@ -311,6 +340,11 @@ namespace Mumbos_Motors.MetaInfo
 
             metaStrings.Add(block);
             return block;
+        }
+
+        public void buildMetaBlock_String(string title, int section, string body)
+        {
+            addMetaToBackground(createBlock_String(title, section, body));
         }
         public void buildMetaBlock_String(string title, int section, int offs, int len)
         {

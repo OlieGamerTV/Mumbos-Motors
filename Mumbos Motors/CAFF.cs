@@ -117,6 +117,8 @@ namespace Mumbos_Motors
 
                 sections = new sectionInfo[numberOfSections];
 
+                Console.WriteLine($"{version} - [{sizeOfHeader} {headerChecksum}] | [{numberOfSymbols} {numberOfFileParts}]");
+
                 //Store the differet section header infos in the struct (0x21 each)
                 for (int i = 0; i < numberOfSections; i++)
                 {

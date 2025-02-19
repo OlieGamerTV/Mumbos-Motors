@@ -100,6 +100,11 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     moddingTab = new vehicle(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
                                                     break;
                                                 }
+                                            case "loctext":
+                                                {
+                                                    moddingTab = new loctext(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                    break;
+                                                }
                                             default:
                                                 {
                                                     moddingTab = new Default(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
