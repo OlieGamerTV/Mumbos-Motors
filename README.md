@@ -15,6 +15,7 @@ supports both drag & drop and opening the file with the executable
 ![Drag n Drop Files](https://i.imgur.com/lgXYStk.png)
 ## Loctext Viewer (Debug/11 or loctext for other languages)
 Load in any loctext file and view strings with their corresponding dialogue tag.
+Comments left in the file will also be read and displayed.
 ## Tag viewer
 allows tags to be seen and ready for modding
 ![Tags](https://i.imgur.com/vyCcSM0.png)
