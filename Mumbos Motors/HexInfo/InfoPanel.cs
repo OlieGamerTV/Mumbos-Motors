@@ -13,6 +13,7 @@ namespace Mumbos_Motors.HexInfo
         public Panel Background;
         private Font font;
         public Label error;
+        public Label id;
         public Label sectionLen;
         public Label offs;
         public Label fileInfoOffs;
@@ -35,6 +36,8 @@ namespace Mumbos_Motors.HexInfo
             //error Label
             error = newlabel();
             error.Text = "Length OK";
+
+            id = newlabel();
 
             //length label
             sectionLen = newlabel();

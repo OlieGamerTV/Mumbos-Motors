@@ -20,6 +20,7 @@ namespace Mumbos_Motors.FileTab.FileInfo
         }
         public override void labels()
         {
+            infoLabels.Add(newLabel("File Type: CAFF"));
             infoLabels.Add(newLabel("Version: " + caff.getVersion()));
             infoLabels.Add(newLabel("Header Size: 0x" + caff.getSizeOfHeader().ToString("X")));
             infoLabels.Add(newLabel("Header CheckSum: " + caff.getHeaderChecksum().ToString("X8")));

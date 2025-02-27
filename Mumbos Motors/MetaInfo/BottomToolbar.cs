@@ -23,7 +23,7 @@ namespace Mumbos_Motors.MetaInfo
             Background.Height = 35;
             Background.Location = new Point(0, 495);
 
-            string[] buttonNames = {"save", "refresh", "export file"};
+            string[] buttonNames = {"Save", "Refresh", "Export File"};
 
             for (int i = 0; i < buttonNames.Length; i++)
             {

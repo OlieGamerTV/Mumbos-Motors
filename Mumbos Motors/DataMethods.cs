@@ -106,6 +106,11 @@ namespace Mumbos_Motors
             */
             return data;
         }
+        public static byte[] writeFloat(byte[] data, int offs, float value, int len)
+        {
+            return BitConverter.GetBytes(value);
+        }
+
         public static void writeDataSection(string path, int offs, int len, byte[] data)
         {
             BinaryWriter br = new BinaryWriter(File.OpenWrite(path));
@@ -237,6 +242,12 @@ namespace Mumbos_Motors
         {
             string ret = "";
             int i = 23;
+
+            if (symbol.Contains("BanjoXDLC")) // L.O.G.'s Lost Challenges has some files with a directory of BanjoXDLC, so that needs to be taken into consideration as well.
+            {
+                i = 26;
+            }
+
             while(symbol[i] != '\\' && i != symbol.Length - 1)
             {
                 //MessageBox.Show(symbol.Length + "\ni: " + i + "\nSymbol[i]: " + symbol[i]);
@@ -249,7 +260,14 @@ namespace Mumbos_Motors
 
         public static string rebuildTextureSymbol(string symbol)
         {
-            return "D:\\LocalLibrary\\BanjoX\\" + symbol + "\\default.rtx";
+            if (symbol.Contains("banjoxdlc"))
+            {
+                return "D:\\LocalLibrary\\BanjoXDLC\\" + symbol + "\\default.rtx";
+            }
+            else
+            {
+                return "D:\\LocalLibrary\\BanjoX\\" + symbol + "\\default.rtx";
+            }
         }
 
         public static void SetClipboard(string text)
@@ -550,7 +568,7 @@ namespace Mumbos_Motors
             return ret;
         }
 
-        public static void saveFileDialog(byte[] data, string filename, string title)
+        public static bool saveFileDialog(byte[] data, string filename, string title)
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Title = "Save " + title;
@@ -558,9 +576,18 @@ namespace Mumbos_Motors
             sfd.FileName = filename;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                File.WriteAllBytes(Path.GetFullPath(sfd.FileName), data);
+                try
+                {
+                    File.WriteAllBytes(Path.GetFullPath(sfd.FileName), data);
+                }
+                catch
+                {
+                    return false;
+                }
+                return true;
             }
             sfd.Dispose();
+            return false;
         }
 
         public static byte[] openFileDialog(string title)

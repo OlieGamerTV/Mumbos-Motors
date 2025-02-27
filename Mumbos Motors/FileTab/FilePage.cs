@@ -37,8 +37,10 @@ namespace Mumbos_Motors
 
 
         //Added a Form1 passthough, I dont know any other way to get the ref ¯\_(ツ)_/¯ -Solar
-        public FilePage(string dir, Form1 Form)
+        //You can get the ref by grabbing the first form from Application.OpenForms. -Olie
+        public FilePage(string dir)
         {
+            Form1 Form = Application.OpenForms[0] as Form1;
             fileName = Path.GetFileName(dir);
 
             int headerWord = DataMethods.readInt32(dir, 0x0);
@@ -123,9 +125,7 @@ namespace Mumbos_Motors
                             {
                             }
 
-                            Console.WriteLine($"EXIT CODE {p.ExitCode}");
-
-                            if(p.ExitCode == 0)
+                            if(p.ExitCode == 0) // An exit code of 0 means it was successful.
                             {
                                 Form.decompAttempts = 0;
                                 error = true; ;
@@ -133,11 +133,11 @@ namespace Mumbos_Motors
                                 newDir += "_decompressed";
                                 Form.ForceLoadFile(newDir);
                             }
-                            else if(p.ExitCode == 1)
+                            else if(p.ExitCode == 1) // An exit code of 1 means that something went wrong.
                             {
                                 if(Form.decompAttempts > 30)
                                 {
-                                    MessageBox.Show("Error opening: " + Path.GetFileName(fileName) + "\n" + DataMethods.readString(dir, 0x0, 0x4));
+                                    MessageBox.Show("Failed to decompress " + Path.GetFileName(fileName) + ".\n" + DataMethods.readString(dir, 0x0, 0x4));
                                     Form.decompAttempts = 0;
                                 }
                                 else
@@ -163,6 +163,11 @@ namespace Mumbos_Motors
                         break;
 
                     }
+                case 0x3026B275: // XMV FILE
+                    error = true;
+                    MessageBox.Show("Error opening: " + Path.GetFileName(fileName) + "\n" + "File supplied is a Xbox Media Video (XMV) file.");
+                    caff = new CAFF(dir);
+                    break;
                 default:
                     {
                         error = true; ;
@@ -171,6 +176,12 @@ namespace Mumbos_Motors
                         break;
                     }
             }
+        }
+
+        public void DisposeCaff()
+        {
+            if (caff != null) { caff.Dispose(); }
+            if (multiCAFF != null) { multiCAFF.Dispose(); }
         }
 
         public bool getError()

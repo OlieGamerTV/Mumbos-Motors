@@ -24,7 +24,7 @@ namespace Mumbos_Motors.FileTab.FileInfo
         }
         public override void labels()
         {
-            infoLabels.Add(newLabel("Title: " + multiCAFF.Title));
+            infoLabels.Add(newLabel("File Type: MULTICAFF"));
             infoLabels.Add(newLabel("Header Size: 0x" + multiCAFF.sectionHeadersStart.ToString("X")));
             infoLabels.Add(newLabel("Section's Header Size: " + multiCAFF.sectionHeaderLen.ToString("X")));
             infoLabels.Add(newLabel("Header Checksum: " + multiCAFF.headerChecksum.ToString("X8")));

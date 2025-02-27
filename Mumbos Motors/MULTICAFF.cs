@@ -36,6 +36,16 @@ namespace Mumbos_Motors
             ReadMULTICAFF();
         }
 
+        public void Dispose()
+        {
+            for(int i = 0; i < caffs.Count; i++)
+            {
+                caffs[i].Dispose();
+            }
+
+            dnbws.Clear();
+        }
+
         public void ReadMULTICAFF()
         {
             Title = DataMethods.readString(path, 0x0, 0x4);

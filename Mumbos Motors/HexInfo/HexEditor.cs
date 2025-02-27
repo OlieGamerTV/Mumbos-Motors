@@ -125,16 +125,21 @@ namespace Mumbos_Motors.HexInfo
                 HexTextBoxes[i][0] = new RichTextBox();
                 HexTextBoxes[i][0].Name = i + "";
                 HexTextBoxes[i][0].Font = defaultFont;
+                HexTextBoxes[i][0].HideSelection = false;
                 HexTextBoxes[i][0].Location = new Point(spacing, spacing);
                 HexTextBoxes[i][0].TextChanged += new EventHandler(hexTextBox_type);
+                HexTextBoxes[i][0].SelectionChanged += new EventHandler(hexTextBox_SelectionChanged);
                 HexTextBoxes[i][0].KeyPress += new KeyPressEventHandler(hexTexBox_keyPressed);
                 HexTextBoxes[i][0].Width = 355;
                 HexTextBoxes[i][0].Height = height;
 
                 //ASCII
                 HexTextBoxes[i][1] = new RichTextBox();
+                HexTextBoxes[i][1].Name = i + "";
                 HexTextBoxes[i][1].Font = defaultFont;
+                HexTextBoxes[i][1].HideSelection = false;
                 HexTextBoxes[i][1].Location = new Point(HexTextBoxes[i][0].Location.X + HexTextBoxes[i][0].Width, spacing);
+                HexTextBoxes[i][1].SelectionChanged += new EventHandler(asciiTextBox_SelectionChanged);
                 HexTextBoxes[i][1].Width = 150;
                 HexTextBoxes[i][1].Height = height;
 
@@ -150,21 +155,22 @@ namespace Mumbos_Motors.HexInfo
                         }
                     case 1:
                         {
+                            infoPanel[i].id.Text = "File ID: 0x" + symbolID.ToString("X");
                             infoPanel[i].offs.Text = "Offset: 0x" + caff.getSectionOffsetSymbolID(symbolID, i).ToString("X");
-                            infoPanel[i].fileInfoOffs.Text = "FileInfo Offs: 0x" + caff.getFileInfoOffs(symbolID, i).ToString("X");
+                            infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x" + caff.getFileInfoOffs(symbolID, i).ToString("X");
                             break;
                         }
                     case 2:
                         {
                             infoPanel[i].offs.Text = "Offset: 0x" + multiCaff.caffs[caffIndex].getSectionOffsetSymbolID(symbolID, i).ToString("X");
-                            infoPanel[i].fileInfoOffs.Text = "FileInfo Offs: 0x" + multiCaff.caffs[caffIndex].getFileInfoOffs(symbolID, i).ToString("X");
+                            infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x" + multiCaff.caffs[caffIndex].getFileInfoOffs(symbolID, i).ToString("X");
                             infoPanel[i].newlabel().Text = "MultiOffs: 0x" + (multiCaff.caffs[caffIndex].address + multiCaff.caffs[caffIndex].getSectionOffsetSymbolID(symbolID, i)).ToString("X");
                             break;
                         }
                     default:
                         {
                             infoPanel[i].offs.Text = "Offset: 0x";
-                            infoPanel[i].fileInfoOffs.Text = "FileInfo Offs: 0x";
+                            infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x";
                             break;
                         }
                 }
@@ -173,6 +179,37 @@ namespace Mumbos_Motors.HexInfo
                 sectionPages[i].Controls.Add(HexTextBoxes[i][0]);
                 sectionPages[i].Controls.Add(HexTextBoxes[i][1]);
             }
+        }
+
+        private void asciiTextBox_SelectionChanged(object sender, EventArgs e)
+        {
+            /*RichTextBox box = sender as RichTextBox;
+            int sectionID = Convert.ToInt32(box.Name);
+            Console.WriteLine(box.SelectionStart);
+            int start = box.SelectionStart * 3;
+            int length = box.SelectionLength * 3;
+
+            int newCheck = Enumerable.Range(box.SelectionStart, box.SelectionLength).Count(x => x == '\n');
+            if (newCheck > 0)
+            {
+                length += newCheck;
+            }
+            HexTextBoxes[sectionID][0].Select(start, length);*/
+        }
+
+        private void hexTextBox_SelectionChanged(object sender, EventArgs e)
+        {
+            /*RichTextBox box = sender as RichTextBox;
+            int sectionID = Convert.ToInt32(box.Name);
+            int start = box.SelectionStart / 3;
+            int length = box.SelectionLength / 3;
+
+            int newCheck = Enumerable.Range(box.SelectionStart, box.SelectionLength).Count(x => x == '\n');
+            if (newCheck > 0)
+            {
+                length -= newCheck;
+            }
+            HexTextBoxes[sectionID][1].Select(start, length); */
         }
 
         public void readSectionsData()

@@ -110,7 +110,7 @@ namespace Mumbos_Motors.MetaInfo
                         label_symbol.Text = multiCaff.caffs[caffIndex].getSymbols()[symbolID];
                         break;
                     }
-                case 3:
+                default:
                     {
                         label_symbol.Text = "[SYMBOL NAME GOES HERE]";
                         break;
@@ -168,32 +168,34 @@ namespace Mumbos_Motors.MetaInfo
             //MetaBlock block = new MetaBlock();
             MetaBlock_text block = new MetaBlock_text(title, section, offs, len);
             block.textBox.Name = (section - 1) + " " + format + " " + metaBlockTexts.Count() + " " + 0;
-            block.textBox.Text = DataMethods.readInt(sectionData[block.section - 1], block.offs, block.len) + "";
-            if (format == 1)
+            byte[] data;
+            switch (format)
             {
-                block.textBox.Text = Convert.ToInt32(block.textBox.Text).ToString("X" + (2 * len));
-                block.textBox.MaxLength = 2 * len;
-            }
-            else if (format == 2)
-            {
-                block.textBox.Text = DataMethods.readFloat(block.textBox.Text) + "";
-            }
-            else if (format == 3)
-            {
-                byte[] data = new byte[len];
-                Array.ConstrainedCopy(sectionData[block.section - 1], offs, data, 0, len);
+                default:
+                    block.textBox.Text = DataMethods.readInt(sectionData[block.section - 1], block.offs, block.len) + "";
+                    break;
+                case 1:
+                    block.textBox.Text = Convert.ToInt32(DataMethods.readInt(sectionData[block.section - 1], block.offs, block.len)).ToString("X" + (2 * len));
+                    block.textBox.MaxLength = 2 * len;
+                    break;
+                case 2:
+                    block.textBox.Text = DataMethods.readFloat32(sectionData[block.section - 1], offs) + "";
+                    break;
+                case 3:
+                    data = new byte[len];
+                    Array.ConstrainedCopy(sectionData[block.section - 1], offs, data, 0, len);
 
-                block.textBox.Text = DataMethods.readInt(DataMethods.swapEndianness(data, len), 0, len) + "";
-            }
-            else if (format == 4)
-            {
-                byte[] data = new byte[len];
-                Array.ConstrainedCopy(sectionData[block.section - 1], offs, data, 0, len);
+                    block.textBox.Text = DataMethods.readInt(DataMethods.swapEndianness(data, len), 0, len) + "";
+                    break;
+                case 4:
+                    data = new byte[len];
+                    Array.ConstrainedCopy(sectionData[block.section - 1], offs, data, 0, len);
 
-                block.textBox.Text = DataMethods.readInt(DataMethods.swapEndianness(data, len), 0, len) + "";
+                    block.textBox.Text = DataMethods.readInt(DataMethods.swapEndianness(data, len), 0, len) + "";
 
-                block.textBox.Text = Convert.ToInt32(block.textBox.Text).ToString("X" + (2 * len));
-                block.textBox.MaxLength = 2 * len;
+                    block.textBox.Text = Convert.ToInt32(block.textBox.Text).ToString("X" + (2 * len));
+                    block.textBox.MaxLength = 2 * len;
+                    break;
             }
             block.textBox.TextChanged += new EventHandler(MetaBlock_Text_update);
 
@@ -423,7 +425,7 @@ namespace Mumbos_Motors.MetaInfo
             int type = Convert.ToInt32(info[3]);
             try
             {
-                int towrite = 0;
+                object towrite = 0;
                 switch (format)
                 {
                     case 0:
@@ -438,7 +440,7 @@ namespace Mumbos_Motors.MetaInfo
                         }
                     case 2:
                         {
-                            towrite = Convert.ToInt32(box.Text, 16);
+                            towrite = Convert.ToSingle(box.Text);
                             break;
                         }
                 }
@@ -446,17 +448,38 @@ namespace Mumbos_Motors.MetaInfo
                 {
                     case 0:
                         {
-                            MetaBlock_Text_Write(metaBlockTexts[blockID], blockID, towrite, metaBlockTexts[blockID].offs, metaBlockTexts[blockID].len);
+                            if(towrite is float)
+                            {
+                                MetaBlock_Text_Write(metaBlockTexts[blockID], blockID, (float)towrite, metaBlockTexts[blockID].offs, metaBlockTexts[blockID].len);
+                            }
+                            else if(towrite is int)
+                            {
+                                MetaBlock_Text_Write(metaBlockTexts[blockID], blockID, (int)towrite, metaBlockTexts[blockID].offs, metaBlockTexts[blockID].len);
+                            }
                             break;
                         }
                     case 1:
                         {
-                            MetaBlock_Text_Write(metaTagrefs[blockID], blockID, towrite, metaTagrefs[blockID].offs, metaTagrefs[blockID].len);
+                            if (towrite is float)
+                            {
+                                MetaBlock_Text_Write(metaTagrefs[blockID], blockID, (float)towrite, metaTagrefs[blockID].offs, metaTagrefs[blockID].len);
+                            }
+                            else if (towrite is int)
+                            {
+                                MetaBlock_Text_Write(metaTagrefs[blockID], blockID, (int)towrite, metaTagrefs[blockID].offs, metaTagrefs[blockID].len);
+                            }
                             break;
                         }
                     case 2:
                         {
-                            MetaBlock_Text_Write(metaTagRefs_Custom[blockID], blockID, towrite, metaTagRefs_Custom[blockID].offs, metaTagRefs_Custom[blockID].len);
+                            if (towrite is float)
+                            {
+                                MetaBlock_Text_Write(metaTagRefs_Custom[blockID], blockID, (float)towrite, metaTagRefs_Custom[blockID].offs, metaTagRefs_Custom[blockID].len);
+                            }
+                            else if (towrite is int)
+                            {
+                                MetaBlock_Text_Write(metaTagRefs_Custom[blockID], blockID, (int)towrite, metaTagRefs_Custom[blockID].offs, metaTagRefs_Custom[blockID].len);
+                            }
                             break;
                         }
                 }
@@ -472,6 +495,11 @@ namespace Mumbos_Motors.MetaInfo
         public void MetaBlock_Text_Write(MetaBlock block, int blockID, int towrite, int offs, int len)
         {
             sectionData[block.section - 1] = DataMethods.writeInt(sectionData[block.section - 1], offs, towrite, len);
+        }
+
+        public void MetaBlock_Text_Write(MetaBlock block, int blockID, float towrite, int offs, int len)
+        {
+            sectionData[block.section - 1] = DataMethods.writeFloat(sectionData[block.section - 1], offs, towrite, len);
         }
 
         void MetaBlock_ComboRef_update(object sender, EventArgs e)

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Mumbos_Motors
 {
@@ -17,7 +17,7 @@ namespace Mumbos_Motors
         0x08 ???
         0x0C ???
         0x10 Tags Table Offset (LE Int32, Relative to LSBL Header)
-        0x14 Debug Label Table Offset (LE Int32, Relative to LSBL Header)
+        0x14 Comments Label Table Offset (LE Int32, Relative to LSBL Header)
         0x18 ??? Table Offset (LE Int32, Relative to LSBL Header)
         Following this is the String Table.
         --- String Table Header ---
@@ -29,7 +29,7 @@ namespace Mumbos_Motors
         Each entry for the total of strings you have is the following:
         0x00 String ID (BE Int32)
         0x04 Total Length In Sequence (LE Int16)
-        After that, the strings are stored as chars separated by null chars. Ignoring the initial nulls, read each string up to their specified length, skipping each null char.
+        After that, the strings are stored as LE Unicode.
         
         --- Tags Table ---
         0x00 Total Section Length (LE Int32)
@@ -40,6 +40,16 @@ namespace Mumbos_Motors
         0x02 ??? (LE Int16)
         0x04 Tag String Offset (LE Int32, relative to the start of the tag strings table.)
         Following this is a table of tag strings, these ones are just straight plain text and can be read until a null char is hit.
+
+        --- Comments Table ---
+        0x00 Total Section Length (LE Int32)
+        0x04 Total Tags (LE Int32)
+        --- Comments Info Table ---
+        Each entry for the total of strings you have is the following:
+        0x01 String ID (?? Int16)
+        0x04 Comment Offset (LE Int32, relative to the start of the comment strings table.)
+        Following this is a table of comment strings, these ones are just straight plain text and can be read until a null char is hit.
+        The string ID correlates to the string before the actual target.
         */
 
         private static string STRING_NODE = "Strings";
@@ -143,7 +153,7 @@ namespace Mumbos_Motors
 
             // The rest of this is dedicated to parsing strings using BinaryReader.
             // Bulk Read the strings and add them to the node list.
-            BinaryReader reader = new BinaryReader(new MemoryStream(hxd.sectionData[0]), Encoding.UTF7);
+            BinaryReader reader = new BinaryReader(new MemoryStream(hxd.sectionData[0]), Encoding.Unicode); // The string table is written in LE Unicode, so initialize the reader for that encoding format.
             long stringStart = (int)LSBL_Start + 0x28 + (6 * stringsCount);
             reader.BaseStream.Seek(stringStart, SeekOrigin.Begin);
             locStrings = new string[stringsCount];
@@ -153,19 +163,24 @@ namespace Mumbos_Motors
             {
                 string tempStr = "";
                 char temp = '\0';
-                //reader.ReadChar();
-                //if (s == 1) reader.ReadChar(); //Skip an extra blank char.
-                while (readChars < stringLengthTotalTable[i] * 2)
+                while (readChars < stringLengthTotalTable[i])
                 {
                     temp = reader.ReadChar();
                     tempStr += temp;
                     readChars++;
                 }
                 locStrings[i] = tempStr.Replace("\0", "");
-                Console.WriteLine(locStrings[i] + " - " + stringLengthTotalTable[i]);
-                MetaBlock_Combo_Custom("String:", 1, 0, 0, STRING_NODE, i);
-                SetupStringTab(locStrings[i]);
+                //Console.WriteLine(locStrings[i] + " - " + stringLengthTotalTable[i]);
+                MetaBlock_Text("String ID:", 1, 0, 0, 0, STRING_NODE, i);
+                EditLastTextBox("" + stringIDTable[i], 100, 0);
+
+                MetaBlock_String("String:", 1, 0, 0, STRING_NODE, i);
+                EditLastStringBox(locStrings[i], 455);
             }
+            reader.Dispose();
+            reader.Close();
+
+            reader = new BinaryReader(new MemoryStream(hxd.sectionData[0]), Encoding.UTF8); // The rest of the entries (tags & comments) are written as plaintext.
 
             // Bulk Read the tags and add them to the node list.
             tagsTable = new string[tagsCount];
@@ -178,10 +193,10 @@ namespace Mumbos_Motors
                 {
                     tempStr += temp;
                 }
-                Console.WriteLine(tempStr);
+                //Console.WriteLine(tempStr);
                 tagsTable[i] = tempStr;
-                MetaBlock_Combo_Custom("Tag:", 1, 0, 0, STRING_NODE, i);
-                SetupStringTab(tempStr);
+                MetaBlock_String("Tag:", 1, 0, 0, STRING_NODE, i);
+                EditLastStringBox(tagsTable[i], 455);
             }
 
             if(commentTableOffset != 0)
@@ -198,10 +213,13 @@ namespace Mumbos_Motors
                     {
                         tempStr += temp;
                     }
-                    Console.WriteLine(tempStr);
+                    //Console.WriteLine(tempStr);
                     commentsTable[i] = tempStr;
-                    MetaBlock_Combo_Custom("Comment:", 1, 0, 0, COMMENTS_NODE, i);
-                    SetupCommentTab(tempStr);
+                    MetaBlock_String("Comment:", 1, 0, 0, COMMENTS_NODE, i);
+                    EditLastStringBox(tempStr, 435);
+
+                    MetaBlock_Text("Connected ID: ", 1, (int)LSBL_Start + 0x10, 0x4, 0, COMMENTS_NODE, i);
+                    EditLastTextBox("" + commentID[i], 100, 0);
                 }
             }
 
@@ -217,6 +235,12 @@ namespace Mumbos_Motors
             MetaBlock_Text("Tags Count: ", 1, tagsTableOffset + (int)LSBL_Start + 0x4, 0x4, 3);
 
             metaTab.buildMetaFunPanel();
+
+            bottomToolBar.addButton("Extract Strings");
+            bottomToolBar.buttons[bottomToolBar.buttons.Count - 1].Click += new EventHandler(export_strings);
+
+            reader.Dispose();
+            reader.Close();
         }
 
         private void ReadStringInfo()
@@ -276,31 +300,27 @@ namespace Mumbos_Motors
             for (int i = 0; i < commentCount; i++)
             {
                 Array.ConstrainedCopy(hxd.sectionData[0], (commentTableOffset + (int)LSBL_Start + 0x8) + (8 * i), id, 0, 4);
-                commentID[i] = DataMethods.readInt(id, 0, 4);
+                commentID[i] = DataMethods.readInt(id, 1, 2);
                 Array.ConstrainedCopy(hxd.sectionData[0], (commentTableOffset + (int)LSBL_Start + 0xC) + (8 * i), offset, 0, 4);
                 commentOffset[i] = DataMethods.readInt(DataMethods.swapEndianness(offset, 4), 0, 4);
                 Console.WriteLine($"COMMENT ID - {commentID[i]}, COMMENT OFFSET - {commentOffset[i]}");
             }
         }
 
-        private void SetupStringTab(string str, int offset = 1)
+        void export_strings(object sender, EventArgs e)
         {
-            // Yes, it's a very hacky way to display it as I didn't want to make too many adjustments, but it works for now.
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Text = str;
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Width = 460;
-            var pos = metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Location;
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Location = new System.Drawing.Point(pos.X - 395, pos.Y);
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].comboBox.Enabled = false;
-        }
-
-        private void SetupCommentTab(string str, int offset = 1)
-        {
-            // Yes, it's a very hacky way to display it as I didn't want to make too many adjustments, but it works for now.
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Text = str;
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Width = 440;
-            var pos = metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Location;
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].textBox.Location = new System.Drawing.Point(pos.X - 375, pos.Y);
-            metaTab.metaTagRefs_Custom[metaTab.metaTagRefs_Custom.Count - offset].comboBox.Enabled = false;
+            StreamWriter writer = new StreamWriter(new MemoryStream());
+            for (int i = 0; i < stringsCount; i++)
+            {
+                writer.WriteLine($"{tagsTable[i]}   ->   {locStrings[i]}");
+            }
+            writer.Flush();
+            if(DataMethods.saveFileDialog((writer.BaseStream as MemoryStream).ToArray(), hxd.symbol + ".txt", "Strings & Tags of loctext file"))
+            {
+                MessageBox.Show($"{hxd.symbol + ".txt"} successfully saved to target location.");
+            }
+            writer.Dispose();
+            writer.Close();
         }
     }
 }

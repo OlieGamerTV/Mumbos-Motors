@@ -25,6 +25,10 @@ namespace Mumbos_Motors
         public override void buildMetaPage()
         {
             MetaBlock_Text("Data Size: ", 1, 0x0, 0x2, 1);
+            MetaBlock_Text("Object Tag: ", 1, 0x0, 0x0, 1);
+            EditLastTextBox(DataMethods.readString(hxd.sectionData[0], 0x2, 0x40), 426);
+            MetaBlock_Text("Object Def ID: ", 1, 0x0, 0x0, 1);
+            EditLastTextBox(DataMethods.readString(hxd.sectionData[0], 0x42, 0x40), 415);
             determineSubCatagory();
             if (subCatagory == "actor")
             {

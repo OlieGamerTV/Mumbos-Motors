@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Drawing;
 using System.IO;
 
 namespace Mumbos_Motors
@@ -290,6 +289,58 @@ namespace Mumbos_Motors
                     hxd.sectionData[i] = metaTab.sectionData[i];
                 }
             }
+        }
+
+        // A bunch of hacky ways of having direct text applied to boxes.
+        /// <summary>
+        /// Hacky way of directly assigning a value to the last created text box.<br/>
+        /// <paramref name="value"/> contains the desired value. <paramref name="width"/> changes how wide the text box will be.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="width"></param>
+        /// <param name="format"></param>
+        public void EditLastTextBox(string value, int width, int format = 0)
+        {
+            switch (format)
+            {
+                default:
+                    metaTab.metaBlockTexts[metaTab.metaBlockTexts.Count - 1].textBox.Text = value;
+                    break;
+                case 1:
+                    metaTab.metaBlockTexts[metaTab.metaBlockTexts.Count - 1].textBox.Text = Convert.ToInt32(value).ToString("X8");
+                    break;
+                case 2:
+                    metaTab.metaBlockTexts[metaTab.metaBlockTexts.Count - 1].textBox.Text = Convert.ToSingle(value) + "";
+                    break;
+            }
+            metaTab.metaBlockTexts[metaTab.metaBlockTexts.Count - 1].textBox.Width = width;
+            var pos = metaTab.metaBlockTexts[metaTab.metaBlockTexts.Count - 1].textBox.Location;
+            metaTab.metaBlockTexts[metaTab.metaBlockTexts.Count - 1].textBox.Location = new System.Drawing.Point(pos.X - (width - 100), pos.Y);
+        }
+
+        /// <summary>
+        /// Hacky way of directly assigning a string to the last created string box.<br/>
+        /// <paramref name="str"/> contains the desired string. <paramref name="width"/> changes how wide the text box will be.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="width"></param>
+        public void EditLastStringBox(string str, int width)
+        {
+            metaTab.metaStrings[metaTab.metaStrings.Count - 1].textBox.Text = str;
+            metaTab.metaStrings[metaTab.metaStrings.Count - 1].textBox.Width = width;
+            var pos = metaTab.metaStrings[metaTab.metaStrings.Count - 1].textBox.Location;
+            metaTab.metaStrings[metaTab.metaStrings.Count - 1].textBox.Location = new System.Drawing.Point(pos.X - (width - 100), pos.Y);
+        }
+
+        /// <summary>
+        /// Hacky way of directly assigning a string to the last created string box.<br/>
+        /// <paramref name="str"/> contains the desired string. <paramref name="width"/> changes how wide the text box will be.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="width"></param>
+        public void EditLastNodeHeight(int height)
+        {
+            metaTab.nodes[metaTab.metaStrings.Count - 1].Background.Height = 50 + height;
         }
     }
 }

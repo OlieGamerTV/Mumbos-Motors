@@ -87,7 +87,6 @@ namespace Mumbos_Motors
 
             //Add the TabPage to tabPage_Main
             tabControl.TabPages.Add(page);
-
         }
 
         /// <summary>
@@ -97,7 +96,7 @@ namespace Mumbos_Motors
         /// <param name="dir"></param>
         private void addTab_Main_File(string dir)
         {
-            FilePage filePage = new FilePage(dir,this);
+            FilePage filePage = new FilePage(dir);
             toolBars.Add(filePage);
 
 
@@ -156,6 +155,7 @@ namespace Mumbos_Motors
                     this.tabControl.TabPages.RemoveAt(i);
                     int index = i - 1;
                     index = Math.Max(index, 0);
+                    toolBars[index].DisposeCaff();
                     toolBars.Remove(toolBars[index]);
                     numFileTabsOpen--;
                     break;
@@ -189,12 +189,14 @@ namespace Mumbos_Motors
                     filePath = openFileDialog.FileName;
 
                     ForceLoadFile(filePath);
-
-                    
                 }
             }
 
             
+        }
+
+        private void tabControl_ControlRemoved(object sender, ControlEventArgs e)
+        {
         }
     }
 }

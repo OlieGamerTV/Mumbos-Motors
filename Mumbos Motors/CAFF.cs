@@ -17,6 +17,12 @@ namespace Mumbos_Motors
         public byte unknown0xD;
     }
 
+    public struct entryInfo
+    {
+        public int position;
+        public int ID;
+    }
+
     public struct sectionInfo
     {
         public string name;
@@ -69,6 +75,8 @@ namespace Mumbos_Motors
         public int fileInfosStart;
         private int dataStart;
 
+        public entryInfo[] entryInfos;
+
 
         private bool error = false;
         private string errorMessage = "none";
@@ -87,6 +95,15 @@ namespace Mumbos_Motors
             this.data = data;
             this.address = address;
             readCAFFData();
+        }
+
+        public void Dispose()
+        {
+            data = new byte[0];
+            unknownData = new byte[0];
+            symbols = new string[0];
+            symbolsOffsets = new int[0];
+            tagCatagories = new string[0];
         }
 
         public void readCAFFData()
@@ -117,7 +134,7 @@ namespace Mumbos_Motors
 
                 sections = new sectionInfo[numberOfSections];
 
-                Console.WriteLine($"{version} - [{sizeOfHeader} {headerChecksum}] | [{numberOfSymbols} {numberOfFileParts}]");
+                //Console.WriteLine($"{version} - [{sizeOfHeader} {headerChecksum}] | [{numberOfSymbols} {numberOfFileParts}]");
 
                 //Store the differet section header infos in the struct (0x21 each)
                 for (int i = 0; i < numberOfSections; i++)
@@ -197,14 +214,14 @@ namespace Mumbos_Motors
 
                 dataStart = p + unknownDataSize;
                 //MessageBox.Show(dataStart.ToString("X8"));
+
+
             }
             catch(Exception ex)
             {
                 error = true;
                 errorMessage = ex.ToString();
             }
-
-
         }
 
         /// <summary>
@@ -215,14 +232,14 @@ namespace Mumbos_Motors
         public byte[][] readSectionsData(int symbolID)
         {
             //MessageBox.Show("symbolID: " + symbolID);
-            int offsFileID = findFileIDSymbolID(symbolID);
+            int offsFileID = FindFileIDSymbolID(symbolID);
             //MessageBox.Show("fileinfo offs: " + offsFileID + "");
             byte[][] sectionData = new byte[numSectionsSymbolID(symbolID)][];
             //MessageBox.Show("sections: " + sectionData.Length);
             //MessageBox.Show("Name: " + caff.getSymbols()[caff.fileInfos[newFileID].ID - 1] + "\n DataStart: " + caff.getDataStart().ToString("X8") + "\n GetSectionOffset: " + caff.getSectionOffset(caff.fileInfos[newFileID].section).ToString("X8") + "\n FileOffset: " + caff.fileInfos[newFileID].dataOffs.ToString("X8") + "\nPosition = " + (caff.getDataStart() + caff.getSectionOffset(caff.fileInfos[newFileID].section) + caff.fileInfos[newFileID].dataOffs).ToString("X8") + "\n\n DataSize: " + caff.fileInfos[newFileID].dataSize.ToString("X8") + "\nID: " + caff.fileInfos[newFileID].ID.ToString("X8"));
             for (int i = 0; i < sectionData.Length; i++)
             {
-                int p = getSectionOffset(offsFileID, i);
+                int p = GetSectionOffset(offsFileID, i);
                 sectionData[i] = new byte[fileInfos[offsFileID + i].dataSize];
 
                 for (int j = p; j < p + sectionData[i].Length; j++)
@@ -234,9 +251,9 @@ namespace Mumbos_Motors
         }
         public byte[] readSectionData(int symbolID, int section) //section base 0
         {
-            int offsFileID = findFileIDSymbolID(symbolID);
+            int offsFileID = FindFileIDSymbolID(symbolID);
             //MessageBox.Show("Name: " + caff.getSymbols()[caff.fileInfos[newFileID].ID - 1] + "\n DataStart: " + caff.getDataStart().ToString("X8") + "\n GetSectionOffset: " + caff.getSectionOffset(caff.fileInfos[newFileID].section).ToString("X8") + "\n FileOffset: " + caff.fileInfos[newFileID].dataOffs.ToString("X8") + "\nPosition = " + (caff.getDataStart() + caff.getSectionOffset(caff.fileInfos[newFileID].section) + caff.fileInfos[newFileID].dataOffs).ToString("X8") + "\n\n DataSize: " + caff.fileInfos[newFileID].dataSize.ToString("X8") + "\nID: " + caff.fileInfos[newFileID].ID.ToString("X8"));
-            int p = getSectionOffset(offsFileID, section);
+            int p = GetSectionOffset(offsFileID, section);
             byte[] sectionData = new byte[fileInfos[offsFileID + section].dataSize];
 
             for (int j = p; j < p + sectionData.Length; j++)
@@ -249,7 +266,7 @@ namespace Mumbos_Motors
         public void writeSectionDataNew(int symbolID, byte[] sectionData, int section, int newSize)
         {
             int Section = section + 1;
-            int offsFileID = findFileIDSymbolID(symbolID);
+            int offsFileID = FindFileIDSymbolID(symbolID);
 
             //create the new data with shifted data
             byte[] newData = new byte[data.Length + newSize];
@@ -330,12 +347,12 @@ namespace Mumbos_Motors
                 BinaryWriter bw = new BinaryWriter(File.OpenWrite(path));
                 //MessageBox.Show(sectionData[1][sectionData[1].Length - 1] + "");
                 int NumberOfSections = sectionData.Length;
-                int offsFileID = findFileIDSymbolID(symbolID);
+                int offsFileID = FindFileIDSymbolID(symbolID);
                 //MessageBox.Show("Name: " + caff.getSymbols()[caff.fileInfos[newFileID].ID - 1] + "\n DataStart: " + caff.getDataStart().ToString("X8") + "\n GetSectionOffset: " + caff.getSectionOffset(caff.fileInfos[newFileID].section).ToString("X8") + "\n FileOffset: " + caff.fileInfos[newFileID].dataOffs.ToString("X8") + "\nPosition = " + (caff.getDataStart() + caff.getSectionOffset(caff.fileInfos[newFileID].section) + caff.fileInfos[newFileID].dataOffs).ToString("X8") + "\n\n DataSize: " + caff.fileInfos[newFileID].dataSize.ToString("X8") + "\nID: " + caff.fileInfos[newFileID].ID.ToString("X8"));
                 for (int i = 0; i < NumberOfSections; i++)
                 {
 
-                    int p = getSectionOffset(offsFileID, i);
+                    int p = GetSectionOffset(offsFileID, i);
                     bw.Seek(p, SeekOrigin.Begin);
                     for (int j = p; j < p + sectionData[i].Length; j++)
                     {
@@ -360,8 +377,8 @@ namespace Mumbos_Motors
             try
             {
                 BinaryWriter bw = new BinaryWriter(File.OpenWrite(path));
-                int offsFileID = findFileIDSymbolID(symbolID);
-                int p = getSectionOffset(offsFileID, section);
+                int offsFileID = FindFileIDSymbolID(symbolID);
+                int p = GetSectionOffset(offsFileID, section);
 
                 bw.Seek(p, SeekOrigin.Begin);
                 for (int i = 0; i < sectionData.Length; i++)
@@ -376,20 +393,20 @@ namespace Mumbos_Motors
             }
         }
 
-        public int getSectionOffset(int offsFileID, int section)
+        public int GetSectionOffset(int offsFileID, int section)
         {
             return getDataStart() + getSectionOffset(fileInfos[offsFileID + section].section) + fileInfos[offsFileID + section].dataOffs;
         }
         public int getSectionOffsetSymbolID(int symbolID, int section)
         {
-            return getDataStart() + getSectionOffset(fileInfos[findFileIDSymbolID(symbolID) + section].section) + fileInfos[findFileIDSymbolID(symbolID) + section].dataOffs;
+            return getDataStart() + getSectionOffset(fileInfos[FindFileIDSymbolID(symbolID) + section].section) + fileInfos[FindFileIDSymbolID(symbolID) + section].dataOffs;
         }
 
-        public int findFileIDSymbolID(int symbolID)//Add +1 to symbolID for fileInfos[].ID to correspond
+        public int FindFileIDSymbolID(int symbolID)//Add +1 to symbolID for fileInfos[].ID to correspond
         {
-            return findFileID(symbolID + 1);
+            return FindFileID(symbolID + 1);
         }
-        public int findFileID(int fileID)//Find the OFFSET for this file id
+        public int FindFileID(int fileID)//Find the OFFSET for this file id
         {
             int i = 0;
             while (fileID != fileInfos[i].ID)
@@ -438,7 +455,7 @@ namespace Mumbos_Motors
 
         public int getFileInfoOffs(int symbolID, int section)
         {
-            return ((findFileIDSymbolID(symbolID) + section) * fileInfoHeaderSize) + fileInfosStart;
+            return ((FindFileIDSymbolID(symbolID) + section) * fileInfoHeaderSize) + fileInfosStart;
         }
 
         /// <summary>

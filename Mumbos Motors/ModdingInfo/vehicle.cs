@@ -50,6 +50,9 @@ namespace Mumbos_Motors
             for (int i = 0; i < parts.Length; i++)
             {
                 int ident = DataMethods.readInt32(hxd.sectionData[section], p + 0x8);
+                string name = DataMethods.readString(hxd.sectionData[section], 0x20, 0x40);
+                MetaBlock_String("Vehicle Name:", 1, 0, 0, nodeName, i);
+                EditLastStringBox(name, 410);
                 MetaBlock_Text("LEFT dist (X):", 1, p + 0x1, 0x1, 0, nodeName, i);
                 MetaBlock_Text("FRONT dist (Y):", 1, p + 0x2, 0x1, 0, nodeName, i);
                 MetaBlock_Text("TOP dist (Z):", 1, p + 0x3, 0x1, 0, nodeName, i);

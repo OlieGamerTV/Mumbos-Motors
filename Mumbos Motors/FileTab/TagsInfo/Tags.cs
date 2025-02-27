@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+using Mumbos_Motors.ModdingInfo;
 
 namespace Mumbos_Motors.FileTab.TagsInfo
 {
@@ -100,6 +101,9 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     moddingTab = new vehicle(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
                                                     break;
                                                 }
+                                            case "marker":
+                                                moddingTab = new marker(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                break;
                                             case "loctext":
                                                 {
                                                     moddingTab = new loctext(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
@@ -113,6 +117,12 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     {
                                                         case "blockset":
                                                             moddingTab = new misc_blockset(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                            break;
+                                                        case "garagegrouping":
+                                                            moddingTab = new garageGrouping(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                            break;
+                                                        case "gameassetref":
+                                                            moddingTab = new gameassetref(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
                                                             break;
                                                         default:
                                                             moddingTab = new Default(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
@@ -160,6 +170,9 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     moddingTab = new loctext(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
                                                     break;
                                                 }
+                                            case "marker":
+                                                moddingTab = new marker(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                break;
                                             case "misc":
                                                 {
                                                     string miscCheck = DataMethods.getNameOfSymbol(tabName, 0x10, 0);
@@ -168,6 +181,12 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     {
                                                         case "blockset":
                                                             moddingTab = new misc_blockset(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                            break;
+                                                        case "garagegrouping":
+                                                            moddingTab = new garageGrouping(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                            break;
+                                                        case "gameassetref":
+                                                            moddingTab = new gameassetref(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
                                                             break;
                                                         default:
                                                             moddingTab = new Default(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
@@ -188,13 +207,20 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                             }
 
                         }
-                        if (tabName.Substring(tabName.Length - 4) == ".xwb")
+                        try
                         {
-                            string soundName = tabName.Substring(0, tabName.Length - 4);
-                            byte[][] sectionData = new byte[1][];
-                            sectionData[0] = DataMethods.readDataSection(multiCaff.path, multiCaff.dnbws[multiCaff.getDNBWIndexByName(soundName)].offs, multiCaff.dnbws[multiCaff.getDNBWIndexByName(soundName)].len);
-                            ModdingTab moddingTab = new ModdingInfo.sound(soundName, multiCaff, sectionData);
-                            addTab(moddingTab, moddingTab.getModdingTabPage());
+                            if (tabName.Substring(tabName.Length - 4) == ".xwb")
+                            {
+                                string soundName = tabName.Substring(0, tabName.Length - 4);
+                                byte[][] sectionData = new byte[1][];
+                                sectionData[0] = DataMethods.readDataSection(multiCaff.path, multiCaff.dnbws[multiCaff.getDNBWIndexByName(soundName)].offs, multiCaff.dnbws[multiCaff.getDNBWIndexByName(soundName)].len);
+                                ModdingTab moddingTab = new ModdingInfo.sound(soundName, multiCaff, sectionData);
+                                addTab(moddingTab, moddingTab.getModdingTabPage());
+                            }
+                        }
+                        catch (ArgumentOutOfRangeException ex)
+                        {
+                            MessageBox.Show($"Error occurred while opening {tabName}.\n" + ex.Message);
                         }
                         break;
                     }

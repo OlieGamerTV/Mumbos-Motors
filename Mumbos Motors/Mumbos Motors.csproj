@@ -107,7 +107,11 @@
     <Compile Include="MetaInfo\MetaNode.cs" />
     <Compile Include="MetaInfo\MetaTab.cs" />
     <Compile Include="MetaInfo\tagref_custom.cs" />
+    <Compile Include="ModdingInfo\gameassetref.cs" />
+    <Compile Include="ModdingInfo\garageGrouping.cs" />
     <Compile Include="ModdingInfo\loctext.cs" />
+    <Compile Include="ModdingInfo\challenge.cs" />
+    <Compile Include="ModdingInfo\marker.cs" />
     <Compile Include="ModdingInfo\misc_blockset.cs" />
     <Compile Include="ModdingInfo\ModdingTab.cs" />
     <Compile Include="ModdingInfo\default.cs" />
