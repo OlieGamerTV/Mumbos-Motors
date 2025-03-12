@@ -63,6 +63,7 @@ namespace Mumbos_Motors
                 sectionInfo[(i - sectionHeadersStart) / sectionHeaderLen].Address = DataMethods.readInt32(path, i + 0x4);
                 sectionInfo[(i - sectionHeadersStart) / sectionHeaderLen].Length = DataMethods.readInt32(path, i + 0x8);
             }
+
             DetermineDataSections();
             getDNBWNames();
         }
@@ -81,7 +82,7 @@ namespace Mumbos_Motors
                         }
                     case "DNBW":
                         {
-                            dnbws.Add(new DNBW(path, sectionInfo[i].Address, sectionInfo[i].Length));
+                            dnbws.Add(new DNBW(path, sectionInfo[i].Address, sectionInfo[i].Length, GetChecksumByAddress(sectionInfo[i].Address)));
                             break;
                         }
                 }
@@ -105,6 +106,18 @@ namespace Mumbos_Motors
                 if (caffs[i].getSymbols().Contains(symbol))
                 {
                     return i;
+                }
+            }
+            return 0;
+        }
+
+        public int GetChecksumByAddress(int address)
+        {
+            for(int i = 0; i < sectionInfo.Length; i++)
+            {
+                if (sectionInfo[i].Address == address)
+                {
+                    return sectionInfo[i].Checksum;
                 }
             }
             return 0;

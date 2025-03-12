@@ -103,11 +103,13 @@ namespace Mumbos_Motors.MetaInfo
                 case 1:
                     {
                         label_symbol.Text = caff.getSymbols()[symbolID];
+                        buildMetaBlock_String("UUID", 0, "" + caff.FindFileSummaryChecksum(symbolID - 1).ToString("X8"));
                         break;
                     }
                 case 2:
                     {
                         label_symbol.Text = multiCaff.caffs[caffIndex].getSymbols()[symbolID];
+                        buildMetaBlock_String("UUID", 0, "" + multiCaff.caffs[caffIndex].FindFileSummaryChecksum(symbolID - 1).ToString("X8"));
                         break;
                     }
                 default:

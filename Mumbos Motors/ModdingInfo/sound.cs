@@ -10,16 +10,15 @@ namespace Mumbos_Motors.ModdingInfo
     public class sound : ModdingTab
     {
         string soundName;
-        MULTICAFF multiCAFF;
         int DNBWIndex;
         byte[][] sectionData;
 
-        public sound(string soundName, MULTICAFF multiCAFF, byte[][] sectionData) : base (sectionData, soundName + ".xwb")
+        public sound(string soundName, MULTICAFF multiCAFF, byte[][] sectionData) : base (multiCAFF.dnbws[multiCAFF.getDNBWIndexByName(soundName)], soundName + ".xwb", sectionData, multiCAFF.getDNBWIndexByName(soundName))
         {
+            this.multiCaff = multiCAFF;
+            dnbwIndex = multiCAFF.getDNBWIndexByName(soundName);
             this.soundName = soundName;
-            this.multiCAFF = multiCAFF;
             this.sectionData = sectionData;
-            DNBWIndex = multiCAFF.getDNBWIndexByName(soundName);
 
             buildMetaPage();
         }
@@ -40,7 +39,7 @@ namespace Mumbos_Motors.ModdingInfo
                 {
                     samples[i - 0x40] = data[i];
                 }
-                if (samples.Length < multiCAFF.dnbws[DNBWIndex].len && samples.Length % 2 == 0)
+                if (samples.Length < multiCaff.dnbws[DNBWIndex].len && samples.Length % 2 == 0)
                 {
                     samples = DataMethods.swapEndianness(samples, 2);
                     for (int i = 0x9C0; i < (samples.Length - 0x9C0); i++)
@@ -60,7 +59,7 @@ namespace Mumbos_Motors.ModdingInfo
 
         void save(object sender, EventArgs e)
         {
-            DataMethods.writeDataSection(multiCAFF.path, multiCAFF.dnbws[DNBWIndex].offs, hxd.sectionData[0].Length, hxd.sectionData[0]);
+            DataMethods.writeDataSection(multiCaff.path, multiCaff.dnbws[DNBWIndex].offs, hxd.sectionData[0].Length, hxd.sectionData[0]);
             HexInfo.HexEditor.SaySaved();
         }
     }

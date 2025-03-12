@@ -118,8 +118,13 @@
     <Compile Include="ModdingInfo\model.cs" />
     <Compile Include="ModdingInfo\objparam.cs" />
     <Compile Include="ModdingInfo\Parts\VehicleParts.cs" />
+    <Compile Include="ModdingInfo\script.cs" />
     <Compile Include="ModdingInfo\sound.cs" />
     <Compile Include="ModdingInfo\texture.cs" />
+    <Compile Include="ModdingInfo\Texture\ColorUtils.cs" />
+    <Compile Include="ModdingInfo\Texture\DDSImage.cs" />
+    <Compile Include="ModdingInfo\Texture\DXT1.cs" />
+    <Compile Include="ModdingInfo\Texture\DXT3.cs" />
     <Compile Include="ModdingInfo\vehicle.cs" />
     <Compile Include="MULTICAFF.cs" />
     <Compile Include="Program.cs" />

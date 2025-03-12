@@ -81,6 +81,11 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                         ModdingTab moddingTab = new Default(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
                                         switch (DataMethods.getNameOfSymbol(tabName, 4, 0))
                                         {
+                                            case "ddstexture":
+                                                {
+                                                    moddingTab = new texture(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                    break;
+                                                }
                                             case "texture":
                                                 {
                                                     moddingTab = new texture(caff, DataMethods.getIndexBySearch(caff.getSymbols(), DataMethods.rebuildTextureSymbol(tabName)));
@@ -102,11 +107,18 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     break;
                                                 }
                                             case "marker":
-                                                moddingTab = new marker(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
-                                                break;
+                                                {
+                                                    moddingTab = new marker(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                    break;
+                                                }
                                             case "loctext":
                                                 {
                                                     moddingTab = new loctext(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
+                                                    break;
+                                                }
+                                            case "script":
+                                                {
+                                                    moddingTab = new script(caff, DataMethods.getIndexBySearch(caff.getSymbols(), tabName));
                                                     break;
                                                 }
                                             case "misc":
@@ -145,6 +157,11 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                         ModdingTab moddingTab = new Default(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
                                         switch (DataMethods.getNameOfSymbol(tabName, 4, 0))
                                         {
+                                            case "ddstexture":
+                                                {
+                                                    moddingTab = new texture(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                    break;
+                                                }
                                             case "texture":
                                                 {
                                                     moddingTab = new texture(multiCaff, multiCaff.getCaffIndexBySymbol(DataMethods.rebuildTextureSymbol(tabName)), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), DataMethods.rebuildTextureSymbol(tabName)));
@@ -170,9 +187,16 @@ namespace Mumbos_Motors.FileTab.TagsInfo
                                                     moddingTab = new loctext(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
                                                     break;
                                                 }
+                                            case "script":
+                                                {
+                                                    moddingTab = new script(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                    break;
+                                                }
                                             case "marker":
-                                                moddingTab = new marker(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
-                                                break;
+                                                {
+                                                    moddingTab = new marker(multiCaff, multiCaff.getCaffIndexBySymbol(tabName), DataMethods.getIndexBySearch(multiCaff.caffs[multiCaff.getCaffIndexBySymbol(tabName)].getSymbols(), tabName));
+                                                    break;
+                                                }
                                             case "misc":
                                                 {
                                                     string miscCheck = DataMethods.getNameOfSymbol(tabName, 0x10, 0);

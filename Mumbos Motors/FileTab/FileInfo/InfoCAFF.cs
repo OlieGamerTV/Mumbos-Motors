@@ -31,6 +31,8 @@ namespace Mumbos_Motors.FileTab.FileInfo
             infoLabels.Add(newLabel("Symbols Start: 0x" + caff.getSymbolsStart().ToString("X")));
             infoLabels.Add(newLabel("FileInfos Start: 0x" + caff.fileInfosStart.ToString("X")));
             infoLabels.Add(newLabel("Data Start: 0x" + caff.getDataStart().ToString("X")));
+            infoLabels.Add(newLabel("CAFF UUID Start: 0x" + caff.getUUIDStart().ToString("X")));
+            infoLabels.Add(newLabel("CAFF UUID Count: 0x" + caff.getUUIDCount().ToString("X")));
         }
     }
 }

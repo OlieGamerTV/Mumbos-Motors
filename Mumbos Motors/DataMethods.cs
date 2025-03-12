@@ -22,6 +22,7 @@ namespace Mumbos_Motors
             int num = 0;
             for (int i = 0; i < 2; i++)
             {
+                if (offs >= data.Length || i >= data.Length) return num;
                 num |= data[offs + i] << (16 - ((i + 1) * 8));
             }
             return num;
@@ -31,6 +32,7 @@ namespace Mumbos_Motors
             int num = 0;
             for (int i = 0; i < 4; i++)
             {
+                if (offs >= data.Length || i >= data.Length) return num;
                 num |= data[offs + i] << (32 - ((i + 1) * 8));
             }
             return num;
@@ -56,6 +58,47 @@ namespace Mumbos_Motors
             }
             return num;
         }
+
+        public static uint readUInt16(byte[] data, int offs)
+        {
+            uint num = 0;
+            for (int i = 0; i < 2; i++)
+            {
+                num |= (uint)data[offs + i] << (16 - ((i + 1) * 8));
+            }
+            return num;
+        }
+        public static uint readUInt32(byte[] data, int offs)
+        {
+            uint num = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                num |= (uint)data[offs + i] << (32 - ((i + 1) * 8));
+            }
+            return num;
+        }
+        public static uint readUInt32(string path, int offs)
+        {
+            BinaryReader br = new BinaryReader(File.OpenRead(path));
+            br.BaseStream.Position = offs;
+            uint num = 0;
+            for (int i = 0; i < 4; i++)
+            {
+
+                num |= (uint)br.ReadByte() << (32 - ((i + 1) * 8));
+            }
+            return num;
+        }
+        public static uint readUInt(byte[] data, int offs, int len)
+        {
+            uint num = 0;
+            for (int i = 0; i < len; i++)
+            {
+                num |= (uint)data[offs + i] << ((len * 8) - ((i + 1) * 8));
+            }
+            return num;
+        }
+
         public static byte[] readDataSection(string path, int offs, int len)
         {
             byte[] ret = new byte[len];
@@ -111,15 +154,24 @@ namespace Mumbos_Motors
             return BitConverter.GetBytes(value);
         }
 
-        public static void writeDataSection(string path, int offs, int len, byte[] data)
+        public static bool writeDataSection(string path, int offs, int len, byte[] data)
         {
-            BinaryWriter br = new BinaryWriter(File.OpenWrite(path));
-            br.BaseStream.Position = offs;
-            for (int i = 0; i < len; i++)
+            try
             {
-                br.Write(data[i]);
+                BinaryWriter br = new BinaryWriter(File.OpenWrite(path));
+                br.BaseStream.Position = offs;
+                for (int i = 0; i < len; i++)
+                {
+                    br.Write(data[i]);
+                }
+                br.Dispose();
+                return true;
             }
-            br.Dispose();
+            catch(Exception e)
+            {
+                MessageBox.Show("Write Failed.\n" + e.Message);
+                return false;
+            }
         }
 
         public static float readFloat32(byte[] data, int offs)
@@ -149,9 +201,11 @@ namespace Mumbos_Motors
         public static string readString(byte[] data, int offs, int length)
         {
             string hi = "";
+
             for (int i = offs; i < offs + length; i++)
             {
-                if (data[i] >= 0x20)
+                if (offs >= data.Length) return hi;
+                if (i < data.Length && data[i] >= 0x20)
                 {
                     //MessageBox.Show(((char)(data[i])).ToString());
                     hi += Convert.ToChar(data[i]);
@@ -609,6 +663,19 @@ namespace Mumbos_Motors
             SaveFileDialog ofd = new SaveFileDialog();
             ofd.Title = "Save Image as .png";
             ofd.Filter = "png files (*.png)|*.*";
+            ofd.FileName = fileName;
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                return ofd.FileName;
+            }
+            return "";
+        }
+
+        public static string saveFileDialogDDSTexture(string fileName)
+        {
+            SaveFileDialog ofd = new SaveFileDialog();
+            ofd.Title = "Save Image as .dds";
+            ofd.Filter = "DirectDraw Surface files (*.dds)|*.*";
             ofd.FileName = fileName;
             if (ofd.ShowDialog() == DialogResult.OK)
             {

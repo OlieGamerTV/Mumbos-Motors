@@ -16,7 +16,9 @@ namespace Mumbos_Motors
         public int symbolID;
         public CAFF caff;
         public MULTICAFF multiCaff;
+        public DNBW dnbw;
         public int caffIndex;
+        public int dnbwIndex;
 
         public TabPage moddingPage;
         public TabControl moddingTabControl;
@@ -33,6 +35,18 @@ namespace Mumbos_Motors
             moddingPage.Text = name;
             metaTab = new MetaInfo.MetaTab(sectionData);
             coreDesign();
+        }
+
+        protected ModdingTab(DNBW dnbw, string name, byte[][] sectionData, int dnbwIndex) //DNBW
+        {
+            this.dnbw = dnbw;
+            this.name = name;
+            hxd = new HexInfo.HexEditor(dnbw, sectionData, dnbwIndex);
+            moddingPage = new TabPage();
+            moddingPage.Text = name;
+            metaTab = new MetaInfo.MetaTab(hxd.sectionData, path);
+            coreDesign();
+            this.dnbwIndex = dnbwIndex;
         }
 
         protected ModdingTab(byte[][] sectionData, string symbol, string path) //FILE

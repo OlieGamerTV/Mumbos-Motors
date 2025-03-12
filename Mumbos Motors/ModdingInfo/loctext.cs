@@ -83,6 +83,11 @@ namespace Mumbos_Motors
         int[] commentOffset;
         string[] commentsTable;
 
+        int positionTableOffset;
+        int positionTableLength;
+        int positionCount;
+        int[] positionID;
+
         public loctext(CAFF caff, int fileID) : base(caff, fileID)
         {
             buildMetaPage();
@@ -142,6 +147,10 @@ namespace Mumbos_Motors
             Array.ConstrainedCopy(hxd.sectionData[0], (int)LSBL_Start + 0x14, length, 0, 4);
             commentTableOffset = DataMethods.readInt(DataMethods.swapEndianness(length, 4), 0, 0x4);
 
+            // Read Comments Table Offset
+            Array.ConstrainedCopy(hxd.sectionData[0], (int)LSBL_Start + 0x18, length, 0, 4);
+            positionTableOffset = DataMethods.readInt(DataMethods.swapEndianness(length, 4), 0, 0x4);
+
             // Bulk Read the String Information.
             ReadStringInfo();
 
@@ -150,6 +159,9 @@ namespace Mumbos_Motors
 
             // Check if the Comment Table Offset isn't 0, skip running this if it is.
             if(commentTableOffset != 0) ReadCommentInfo();
+
+            // Check if the Comment Table Offset isn't 0, skip running this if it is.
+            if (positionTableOffset != 0) ReadPositionInfo();
 
             // The rest of this is dedicated to parsing strings using BinaryReader.
             // Bulk Read the strings and add them to the node list.
@@ -176,6 +188,19 @@ namespace Mumbos_Motors
 
                 MetaBlock_String("String:", 1, 0, 0, STRING_NODE, i);
                 EditLastStringBox(locStrings[i], 455);
+
+                if(positionTableOffset != 0)
+                {
+                    for (int p = 0; p < positionCount; p++)
+                    {
+                        if (positionID[p] == stringIDTable[i])
+                        {
+                            MetaBlock_Text("POS:", 1, 0, 0, 1, STRING_NODE, i);
+                            EditLastTextBox("" + p, 455, 1);
+                            break;
+                        }
+                    }
+                }
             }
             reader.Dispose();
             reader.Close();
@@ -307,12 +332,85 @@ namespace Mumbos_Motors
             }
         }
 
+        private void ReadPositionInfo()
+        {
+            byte[] length = new byte[4];
+            Array.ConstrainedCopy(hxd.sectionData[0], positionTableOffset + (int)LSBL_Start, length, 0, 4);
+            positionTableLength = DataMethods.readInt(DataMethods.swapEndianness(length, 4), 0, 0x4);
+            Array.ConstrainedCopy(hxd.sectionData[0], positionTableOffset + (int)LSBL_Start + 0x4, length, 0, 4);
+            positionCount = DataMethods.readInt(DataMethods.swapEndianness(length, 4), 0, 0x4);
+            positionID = new int[positionCount];
+            for (int i = 0; i < positionCount; i++)
+            {
+                positionID[i] = DataMethods.readInt(hxd.sectionData[0], (positionTableOffset + (int)LSBL_Start + 0x8) + (2 * i), 2);
+                Console.WriteLine($"POSITION ID - {positionID[i]}");
+            }
+        }
+
         void export_strings(object sender, EventArgs e)
         {
+            List<int> stringPositions = new List<int>();
+            if (positionCount != 0)
+            {
+                for (int i = 0; i < positionCount; i++)
+                {
+                    stringPositions.Add(stringsCount - 1);
+                    for (int j = 0; j < stringsCount; j++)
+                    {
+                        if (positionID[i] == stringIDTable[j])
+                        {
+                            stringPositions.Insert(i, j);
+                            break;
+                        }
+                    }
+                }
+            }
+
             StreamWriter writer = new StreamWriter(new MemoryStream());
+            string preload_comment = "";
             for (int i = 0; i < stringsCount; i++)
             {
+                if (!string.IsNullOrEmpty(preload_comment))
+                {
+                    writer.Write($"\n{preload_comment}");
+                    preload_comment = string.Empty;
+                }
+
                 writer.WriteLine($"{tagsTable[i]}   ->   {locStrings[i]}");
+                /*if (positionCount != 0)
+                {
+                    writer.WriteLine($"{tagsTable[stringPositions[i]]}   ->   {locStrings[stringPositions[i]]}");
+                }
+                else
+                {
+                    writer.WriteLine($"{tagsTable[i]}   ->   {locStrings[i]}");
+                }*/
+
+                if (commentCount != 0)
+                {
+                    for (int c = 0; c < commentCount; c++)
+                    {
+                        if (commentID[c] == stringIDTable[i])
+                        {
+                            preload_comment = commentsTable[c];
+                        }
+
+                        /*if (positionCount != 0)
+                        {
+                            if (commentID[c] == stringIDTable[stringPositions[i]])
+                            {
+                                preload_comment = commentsTable[c];
+                            }
+                        }
+                        else
+                        {
+                            if (commentID[c] == stringIDTable[i])
+                            {
+                                preload_comment = commentsTable[c];
+                            }
+                        }*/
+                    }
+                }
             }
             writer.Flush();
             if(DataMethods.saveFileDialog((writer.BaseStream as MemoryStream).ToArray(), hxd.symbol + ".txt", "Strings & Tags of loctext file"))

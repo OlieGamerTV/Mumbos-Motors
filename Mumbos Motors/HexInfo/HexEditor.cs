@@ -13,8 +13,10 @@ namespace Mumbos_Motors.HexInfo
     {
         public string path;
         private CAFF caff;
+        private DNBW dnbw;
         private MULTICAFF multiCaff;
         private int caffIndex;
+        private int dnbwIndex;
         public TabPage[] sectionPages;
         public RichTextBox[][] HexTextBoxes;
         public HexInfo.InfoPanel[] infoPanel;
@@ -34,7 +36,7 @@ namespace Mumbos_Motors.HexInfo
 
         public HexEditor(byte[][] sectionData) //MISC DATA
         {
-            type = 3;
+            type = 4;
             this.sectionData = sectionData;
             numberOfSections = sectionData.Length;
             coreDesign();
@@ -61,6 +63,19 @@ namespace Mumbos_Motors.HexInfo
             numberOfSections = caff.numSectionsSymbolID(symbolID);
             readSectionsData();
             isTexture = caff.getSymbols()[symbolID].Contains("aid_texture");
+            //numberOfSections = caff.numSectionsSymbolID(symbolID);
+
+            coreDesign();
+        }
+
+        public HexEditor(DNBW dnbw, byte[][] sectionData, int symbolID) //DNBW
+        {
+            type = 3;
+            this.dnbw = dnbw;
+            this.symbolID = symbolID;
+            symbol = dnbw.name;
+            numberOfSections = 1;
+            this.sectionData = sectionData;
             //numberOfSections = caff.numSectionsSymbolID(symbolID);
 
             coreDesign();
@@ -147,6 +162,7 @@ namespace Mumbos_Motors.HexInfo
                 //InfoPanel
                 infoPanel[i] = new InfoPanel(new Point(HexTextBoxes[i][1].Location.X + HexTextBoxes[i][1].Width, spacing), height);
                 infoPanel[i].sectionLen.Text = "Length: 0x" + sectionData[i].Length.ToString("X");
+                Console.WriteLine(type);
                 switch (type)
                 {
                     case 0:
@@ -155,20 +171,29 @@ namespace Mumbos_Motors.HexInfo
                         }
                     case 1:
                         {
-                            infoPanel[i].id.Text = "File ID: 0x" + symbolID.ToString("X");
+                            infoPanel[i].id.Text = "ID: 0x" + caff.FindFileSummaryChecksum(symbolID - 1).ToString("X8");
                             infoPanel[i].offs.Text = "Offset: 0x" + caff.getSectionOffsetSymbolID(symbolID, i).ToString("X");
                             infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x" + caff.getFileInfoOffs(symbolID, i).ToString("X");
                             break;
                         }
                     case 2:
                         {
+                            infoPanel[i].id.Text = "File ID: 0x" + multiCaff.GetChecksumByAddress(multiCaff.caffs[caffIndex].address).ToString("X");
                             infoPanel[i].offs.Text = "Offset: 0x" + multiCaff.caffs[caffIndex].getSectionOffsetSymbolID(symbolID, i).ToString("X");
                             infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x" + multiCaff.caffs[caffIndex].getFileInfoOffs(symbolID, i).ToString("X");
                             infoPanel[i].newlabel().Text = "MultiOffs: 0x" + (multiCaff.caffs[caffIndex].address + multiCaff.caffs[caffIndex].getSectionOffsetSymbolID(symbolID, i)).ToString("X");
                             break;
                         }
+                    case 3:
+                        {
+                            infoPanel[i].id.Text = "File ID: 0x" + dnbw.checksum.ToString("X");
+                            infoPanel[i].offs.Text = "Offset: 0x" + dnbw.offs.ToString("X");
+                            infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x";
+                            break;
+                        }
                     default:
                         {
+                            infoPanel[i].id.Text = "File ID: 0x";
                             infoPanel[i].offs.Text = "Offset: 0x";
                             infoPanel[i].fileInfoOffs.Text = "FI Offs: 0x";
                             break;
@@ -229,7 +254,7 @@ namespace Mumbos_Motors.HexInfo
         {
             caff.readCAFFData();
             readSectionsData();
-            if (getSectionSize(Section) <= 0x15000)
+            if (getSectionSize(Section) <= 0x30000)
             {
                 HexTextBoxes[Section][0].Text = DataMethods.dataToHexString(sectionData[Section], bytesPerRow);
                 HexTextBoxes[Section][1].Text = DataMethods.dataToASCIIString(sectionData[Section], bytesPerRow);
@@ -242,7 +267,7 @@ namespace Mumbos_Motors.HexInfo
         public void updateHexTextBox_partial(int section)
         {
             //readDataSection(Section);
-            if (getSectionSize(section) <= 0x15000)
+            if (getSectionSize(section) <= 0x30000)
             {
                 HexTextBoxes[section][0].Text = DataMethods.dataToHexString(sectionData[section], bytesPerRow);
                 HexTextBoxes[section][1].Text = DataMethods.dataToASCIIString(sectionData[section], bytesPerRow);
@@ -255,6 +280,7 @@ namespace Mumbos_Motors.HexInfo
 
         public void Save()
         {
+            bool saveSuccess = false;
             bool isSaving = true;
             if (!hexTextError)
             {
@@ -262,7 +288,6 @@ namespace Mumbos_Motors.HexInfo
                 {
                     case 0:
                         {
-                            
                             int length = 0;
                             for (int i = 0; i < sectionData.Length; i++)
                             {
@@ -278,7 +303,14 @@ namespace Mumbos_Motors.HexInfo
                                     k++;
                                 }
                             }
-                            File.WriteAllBytes(path, toSave);
+                            try
+                            {
+                                File.WriteAllBytes(path, toSave);
+                            }
+                            catch (Exception e) 
+                            {
+                                MessageBox.Show("Write Failed.\n" + e.Message);
+                            }
                             break;
                         }
                     case 1:
@@ -290,7 +322,7 @@ namespace Mumbos_Motors.HexInfo
                                 int oldLength = caff.readSectionData(symbolID, i).Length;
                                 if (newLength == oldLength)
                                 {
-                                    caff.writeSectionData(symbolID, sectionData[i], i);
+                                    saveSuccess = caff.writeSectionData(symbolID, sectionData[i], i);
                                 }
                                 else
                                 {
@@ -299,7 +331,7 @@ namespace Mumbos_Motors.HexInfo
                                     isSaving = dialogResult == DialogResult.Yes;
                                     if (isSaving)
                                     {
-                                        caff.writeSectionDataNew(symbolID, sectionData[i], i, change);
+                                        saveSuccess = caff.writeSectionDataNew(symbolID, sectionData[i], i, change);
                                         for (int j = 0; i < sectionData.Length; i++)
                                         {
                                             updateHexTextBox(j);
@@ -307,7 +339,7 @@ namespace Mumbos_Motors.HexInfo
                                     }
                                 }
                             }
-                            if (isSaving)
+                            if (isSaving && saveSuccess)
                             {
                                 SaySaved();
                             }
@@ -317,7 +349,12 @@ namespace Mumbos_Motors.HexInfo
                         {
                             for (int i = 0; i < sectionData.Length; i++)
                             {
-                                DataMethods.writeDataSection(multiCaff.path, multiCaff.caffs[caffIndex].address + multiCaff.caffs[caffIndex].getSectionOffsetSymbolID(symbolID, i), sectionData[i].Length, sectionData[i]);
+                                saveSuccess = DataMethods.writeDataSection(multiCaff.path, multiCaff.caffs[caffIndex].address + multiCaff.caffs[caffIndex].getSectionOffsetSymbolID(symbolID, i), sectionData[i].Length, sectionData[i]);
+
+                                if (!saveSuccess)
+                                {
+                                    break;
+                                }
                             }
                             SaySaved();
                             break;

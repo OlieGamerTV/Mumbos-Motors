@@ -15,6 +15,8 @@ namespace Mumbos_Motors
 
         For each entry:
         0x00 Entry Length (BE Int32)
+        0x04 Entry Type (BE Int16)
+        0x06 Entry ID (BE Int16)
         0x14 X Pos(?) (BE Float)
         0x18 Y Pos(?) (BE Float)
         0x1C Z Pos(?) (BE Float)
@@ -58,86 +60,81 @@ namespace Mumbos_Motors
                 this.sceneIndicator = "";
             }
 
-            public BaseEntry(int entryLength, Vector3 position)
+            public BaseEntry(int entryLength = 0, Vector3 position = new Vector3(), string sceneIndicator = "")
             {
                 this.entryLength = entryLength;
+                this.entryType = 0;
+                this.entryID = 0;
                 this.position = position;
                 this.sceneIndicator = "";
             }
 
-            public BaseEntry(int entryLength, Vector3 position, string sceneIndicator)
+            public BaseEntry(int entryLength = 0, int entryType = 0, int entryID = 0, Vector3 position = new Vector3(), string sceneIndicator = "")
             {
                 this.entryLength = entryLength;
+                this.entryType = entryType;
+                this.entryID = entryID;
                 this.position = position;
                 this.sceneIndicator = sceneIndicator;
             }
 
             public int entryLength;
+            public int entryType;
+            public int entryID;
             public Vector3 position;
             public string sceneIndicator;
         }
 
-        public class GameFlagEntry : BaseEntry
+        public class ObjectEntry : BaseEntry
         {
-            public GameFlagEntry()
+            public ObjectEntry() : base() { }
+
+            public ObjectEntry(int entryLength = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, position, sceneIndicator)
             {
-                this.entryLength = 0;
-                this.position = new Vector3();
                 this.gameFlag = "";
-                this.sceneIndicator = "";
             }
 
-            public GameFlagEntry(int entryLength, Vector3 position)
+            public ObjectEntry(int entryLength = 0, int entryType = 0, int entryID = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, entryType, entryID, position, sceneIndicator)
             {
-                this.entryLength = entryLength;
-                this.position = position;
                 this.gameFlag = "";
-                this.sceneIndicator = "";
             }
 
-            public GameFlagEntry(int entryLength, Vector3 position, string sceneIndicator)
+            public ObjectEntry(string gameFlag, int entryLength = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, position, sceneIndicator)
             {
-                this.entryLength = entryLength;
-                this.position = position;
-                this.gameFlag = "";
-                this.sceneIndicator = sceneIndicator;
-            }
-
-            public GameFlagEntry(int entryLength, Vector3 position, string sceneIndicator, string gameFlag)
-            {
-                this.entryLength = entryLength;
-                this.position = position;
                 this.gameFlag = gameFlag;
-                this.sceneIndicator = sceneIndicator;
+            }
+
+            public ObjectEntry(string gameFlag, int entryLength = 0, int entryType = 0, int entryID = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, entryType, entryID, position, sceneIndicator)
+            {
+                this.gameFlag = gameFlag;
             }
 
             public string gameFlag;
+
+            public uint objParamID;
+            public uint scriptID;
         }
 
         public class NPCEntry : BaseEntry
         {
-            public NPCEntry()
-            {
-                this.entryLength = 0;
-                this.position = new Vector3();
-                this.sceneIndicator = "";
-            }
+            public NPCEntry() : base() { }
 
-            public NPCEntry(int entryLength, Vector3 position)
-            {
-                this.entryLength = entryLength;
-                this.position = position;
-                this.sceneIndicator = "";
-            }
+            public NPCEntry(int entryLength = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, position, sceneIndicator) { }
 
-            public NPCEntry(int entryLength, Vector3 position, string sceneIndicator)
-            {
-                this.entryLength = entryLength;
-                this.position = position;
-                this.sceneIndicator = sceneIndicator;
-            }
+            public NPCEntry(int entryLength = 0, int entryType = 0, int entryID = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, entryType, entryID, position, sceneIndicator) { }
 
             public string objFlag;
+        }
+
+        public class PortalEntry : BaseEntry
+        {
+            public PortalEntry() : base() { }
+
+            public PortalEntry(int entryLength = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, position, sceneIndicator) { }
+
+            public PortalEntry(int entryLength = 0, int entryType = 0, int entryID = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, entryType, entryID, position, sceneIndicator) { }
+
+            public uint objParamUUID, scriptUUID;
         }
 
         public class CrateEntry : BaseEntry
@@ -149,19 +146,9 @@ namespace Mumbos_Motors
                 this.sceneIndicator = "";
             }
 
-            public CrateEntry(int entryLength, Vector3 position)
-            {
-                this.entryLength = entryLength;
-                this.position = position;
-                this.sceneIndicator = "";
-            }
+            public CrateEntry(int entryLength = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, position, sceneIndicator) { }
 
-            public CrateEntry(int entryLength, Vector3 position, string sceneIndicator)
-            {
-                this.entryLength = entryLength;
-                this.position = position;
-                this.sceneIndicator = sceneIndicator;
-            }
+            public CrateEntry(int entryLength = 0, int entryType = 0, int entryID = 0, Vector3 position = new Vector3(), string sceneIndicator = "") : base(entryLength, entryType, entryID, position, sceneIndicator) { }
 
             public string gameFlag, collectedCrate, unlockedCrate;
         }
@@ -170,8 +157,6 @@ namespace Mumbos_Motors
         private static string SPECIFIC_ENTRY_UNK1 = "Marker Entry - Scene Indicator";
 
         List<BaseEntry> entries;
-
-
 
         public marker(CAFF caff, int symbolID) : base(caff, symbolID)
         {
@@ -186,48 +171,57 @@ namespace Mumbos_Motors
         
         public override void buildMetaPage()
         {
+            byte[] tempSectionData = hxd.sectionData[0];
             int pos = 0;
             int count = 0;
             entries = new List<BaseEntry>();
-            while (pos < hxd.sectionData[0].Length)
+            while (pos < tempSectionData.Length)
             {
                 BaseEntry entry = new BaseEntry();
-                int length = DataMethods.readInt32(hxd.sectionData[0], pos);
+                int length = DataMethods.readInt32(tempSectionData, pos);
+                int type = DataMethods.readInt16(tempSectionData, pos + 0x4);
+                int id = DataMethods.readInt16(tempSectionData, pos + 0x6);
                 Vector3 worldPos = new Vector3();
-                worldPos.x = DataMethods.readFloat32(hxd.sectionData[0], pos + 0x14);
-                worldPos.y = DataMethods.readFloat32(hxd.sectionData[0], pos + 0x18);
-                worldPos.z = DataMethods.readFloat32(hxd.sectionData[0], pos + 0x1C);
+                worldPos.x = DataMethods.readFloat32(tempSectionData, pos + 0x14);
+                worldPos.y = DataMethods.readFloat32(tempSectionData, pos + 0x18);
+                worldPos.z = DataMethods.readFloat32(tempSectionData, pos + 0x1C);
                 entry.entryLength = length;
+                entry.entryType = type;
+                entry.entryID = id;
                 entry.position = worldPos;
 
-                if (length == 0x7C)
+                if (type == 0xE)
                 {
-                    entry.sceneIndicator = DataMethods.readString(hxd.sectionData[0], pos + 0x38, 0x40);
+                    entry.sceneIndicator = DataMethods.readString(tempSectionData, pos + 0x38, 0x40);
                 }
-                if (length == 0xD0)
+                if (type == 0x1C)
                 {
-                    entry = new GameFlagEntry(length, worldPos);
-                    entry.sceneIndicator = DataMethods.readString(hxd.sectionData[0], pos + 0x90, 0x40);
-                    (entry as GameFlagEntry).gameFlag = DataMethods.readString(hxd.sectionData[0], pos + 0x48, 0x40);
+                    entry = new ObjectEntry(length, type, id, worldPos);
+                    entry.sceneIndicator = DataMethods.readString(tempSectionData, pos + 0x90, 0x40);
+                    (entry as ObjectEntry).gameFlag = DataMethods.readString(tempSectionData, pos + 0x48, 0x40);
+                    (entry as ObjectEntry).objParamID = DataMethods.readUInt32(tempSectionData, pos + 0x3C);
+                    (entry as ObjectEntry).scriptID = DataMethods.readUInt32(tempSectionData, pos + 0x40);
                 }
-                if (length == 0x12C)
+                if (type == 0x6)
                 {
-                    entry = new NPCEntry(length, worldPos);
-                    (entry as NPCEntry).objFlag = DataMethods.readString(hxd.sectionData[0], pos + 0x44, 0x40);
-                    entry.sceneIndicator = DataMethods.readString(hxd.sectionData[0], pos + 0xEC, 0x40);
+                    entry = new NPCEntry(length, type, id, worldPos);
+                    (entry as NPCEntry).objFlag = DataMethods.readString(tempSectionData, pos + 0x44, 0x40);
+                    entry.sceneIndicator = DataMethods.readString(tempSectionData, pos + 0xEC, 0x40);
                 }
-                if (length == 0x148)
+                if (type == 0x24)
                 {
-                    entry = new CrateEntry(length, worldPos);
-                    (entry as CrateEntry).collectedCrate = DataMethods.readString(hxd.sectionData[0], pos + 0x3C, 0x40);
-                    (entry as CrateEntry).unlockedCrate = DataMethods.readString(hxd.sectionData[0], pos + 0x7C, 0x40);
-                    (entry as CrateEntry).gameFlag = DataMethods.readString(hxd.sectionData[0], pos + 0x108, 0x40);
+                    entry = new CrateEntry(length, type, id, worldPos);
+                    (entry as CrateEntry).collectedCrate = DataMethods.readString(tempSectionData, pos + 0x3C, 0x40);
+                    (entry as CrateEntry).unlockedCrate = DataMethods.readString(tempSectionData, pos + 0x7C, 0x40);
+                    (entry as CrateEntry).gameFlag = DataMethods.readString(tempSectionData, pos + 0x108, 0x40);
                 }
 
                 pos += length;
                 count++;
                 entries.Add(entry);
             }
+
+            pos = 0;
 
             MetaBlock_Text("Entry Count: ", 1, 0x0, 0x0, 1);
             EditLastTextBox("" + count, 110);
@@ -238,20 +232,32 @@ namespace Mumbos_Motors
                 MetaBlock_Text("Entry Length: ", 1, 0x0, 0x0, 1, BASE_ENTRY, i);
                 EditLastTextBox("" + entries[i].entryLength, 110);
 
-                if (entries[i].entryLength == 0x7C)
+                MetaBlock_Text("Entry Type: ", 1, 0x0, 0x0, 1, BASE_ENTRY, i);
+                EditLastTextBox("" + entries[i].entryType, 110);
+
+                MetaBlock_Text("Entry ID: ", 1, 0x0, 0x0, 1, BASE_ENTRY, i);
+                EditLastTextBox("" + entries[i].entryID, 110);
+
+                if (entries[i].entryType == 0xE)
                 {
                     MetaBlock_String("Indicator Tag: ", 1, 0x0, 0x0, BASE_ENTRY, i);
                     EditLastStringBox("" + entries[i].sceneIndicator, 380);
                 }
-                if (entries[i].entryLength == 0xD0)
+                if (entries[i].entryType == 0x1C)
                 {
                     MetaBlock_String("Game Flag: ", 1, 0x0, 0x0, BASE_ENTRY, i);
-                    EditLastStringBox("" + (entries[i] as GameFlagEntry).gameFlag, 380);
+                    EditLastStringBox("" + (entries[i] as ObjectEntry).gameFlag, 380);
 
                     MetaBlock_String("Indicator Tag: ", 1, 0x0, 0x0, BASE_ENTRY, i);
                     EditLastStringBox("" + entries[i].sceneIndicator, 380);
+
+                    MetaBlock_Text("Obj Param ID: ", 1, 0x0, 0x0, 1, BASE_ENTRY, i);
+                    EditLastTextBox("" + (entries[i] as ObjectEntry).objParamID, 380, 1);
+
+                    MetaBlock_Text("Script ID: ", 1, 0x0, 0x0, 1, BASE_ENTRY, i);
+                    EditLastTextBox("" + (entries[i] as ObjectEntry).scriptID, 380, 1);
                 }
-                if (entries[i].entryLength == 0x12C)
+                if (entries[i].entryType == 0x6)
                 {
                     MetaBlock_String("Object Flag: ", 1, 0x0, 0x0, BASE_ENTRY, i);
                     EditLastStringBox("" + (entries[i] as NPCEntry).objFlag, 380);
@@ -259,7 +265,7 @@ namespace Mumbos_Motors
                     MetaBlock_String("Indicator Tag: ", 1, 0x0, 0x0, BASE_ENTRY, i);
                     EditLastStringBox("" + entries[i].sceneIndicator, 380);
                 }
-                if (entries[i].entryLength == 0x148)
+                if (entries[i].entryType == 0x24)
                 {
                     MetaBlock_String("Collected Crate Flag: ", 1, 0x0, 0x0, BASE_ENTRY, i);
                     EditLastStringBox("" + (entries[i] as CrateEntry).collectedCrate, 380);

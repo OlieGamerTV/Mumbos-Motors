@@ -16,7 +16,7 @@ namespace Mumbos_Motors
         public Panel Background;
         public Panel[] background;
         public int[] spacing;
-        public int sideSpacing = 60;
+        public int sideSpacing = 120;
         public int downFix = 10;
         public string Title;
         public int pages;

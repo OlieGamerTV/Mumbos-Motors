@@ -17,6 +17,12 @@ namespace Mumbos_Motors
         public byte unknown0xD;
     }
 
+    public struct SummaryInfo
+    {
+        public int ID;
+        public int Checksum;
+    }
+
     public struct entryInfo
     {
         public int position;
@@ -77,6 +83,10 @@ namespace Mumbos_Motors
 
         public entryInfo[] entryInfos;
 
+        private int summaryStart;
+        public SummaryInfo[] summaryInfos;
+        public int summaryChecksum;
+        public int summaryInfosCount;
 
         private bool error = false;
         private string errorMessage = "none";
@@ -213,9 +223,25 @@ namespace Mumbos_Motors
                 }
 
                 dataStart = p + unknownDataSize;
-                //MessageBox.Show(dataStart.ToString("X8"));
+                
+                int summaryPos = dataStart + fileInfos[fileInfos.Length - 1].dataOffs;
 
+                summaryStart = summaryPos;
 
+                summaryChecksum = DataMethods.readInt32(data, summaryPos + 0x4);
+                summaryInfosCount = DataMethods.readInt32(data, summaryPos + 0xC) + 1;
+
+                summaryInfos = new SummaryInfo[summaryInfosCount];
+
+                p = summaryPos + 0x1C;
+                for (int i = 0; i < summaryInfosCount; i++)
+                {
+                    SummaryInfo newSummery = new SummaryInfo();
+                    newSummery.ID = DataMethods.readInt32(data, p);
+                    newSummery.Checksum = DataMethods.readInt32(data, p + 0x4);
+                    summaryInfos[i] = newSummery;
+                    p += 0x8;
+                }
             }
             catch(Exception ex)
             {
@@ -263,7 +289,7 @@ namespace Mumbos_Motors
             return sectionData;
         }
 
-        public void writeSectionDataNew(int symbolID, byte[] sectionData, int section, int newSize)
+        public bool writeSectionDataNew(int symbolID, byte[] sectionData, int section, int newSize)
         {
             int Section = section + 1;
             int offsFileID = FindFileIDSymbolID(symbolID);
@@ -305,7 +331,16 @@ namespace Mumbos_Motors
 
             data = new byte[newData.Length];
             newData.CopyTo(data, 0);
-            File.WriteAllBytes(path, data);
+            try
+            {
+                File.WriteAllBytes(path, data);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("File Inaccessible\n" + ex.Message);
+                return false;
+            }
             //MessageBox.Show("newData Size: " + newData.Length + "\n oldSize: " + data.Length);
         }
 
@@ -340,7 +375,7 @@ namespace Mumbos_Motors
             return Data;
         }
 
-        public void writeSectionData(int symbolID, byte[][] sectionData)
+        public bool writeSectionData(int symbolID, byte[][] sectionData)
         {
             try
             {
@@ -365,14 +400,16 @@ namespace Mumbos_Motors
                 }
                 //File.WriteAllBytes(path, data);
                 bw.Dispose();
+                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("File Inaccessible");
+                MessageBox.Show("File Inaccessible\n" + ex.Message);
+                return false;
             }
             
         }
-        public void writeSectionData(int symbolID, byte[] sectionData, int section)
+        public bool writeSectionData(int symbolID, byte[] sectionData, int section)
         {
             try
             {
@@ -386,10 +423,12 @@ namespace Mumbos_Motors
                     bw.Write(sectionData[i]);
                 }
                 bw.Dispose();
+                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("File Inaccessible");
+                MessageBox.Show("File Inaccessible\n" + ex.Message);
+                return false;
             }
         }
 
@@ -400,6 +439,16 @@ namespace Mumbos_Motors
         public int getSectionOffsetSymbolID(int symbolID, int section)
         {
             return getDataStart() + getSectionOffset(fileInfos[FindFileIDSymbolID(symbolID) + section].section) + fileInfos[FindFileIDSymbolID(symbolID) + section].dataOffs;
+        }
+
+        public int FindFileSummaryChecksum(int fileID)
+        {
+            if(summaryInfos == null || summaryInfos.Length == 0) { return 0; }
+            for(int i = 0; i < summaryInfos.Length; i++)
+            {
+                if (summaryInfos[i].ID == fileID) return summaryInfos[i].Checksum;
+            }
+            return 0;
         }
 
         public int FindFileIDSymbolID(int symbolID)//Add +1 to symbolID for fileInfos[].ID to correspond
@@ -639,6 +688,16 @@ namespace Mumbos_Motors
         public string[][] getOrderedTags()
         {
             return orderedTags;
+        }
+
+        public int getUUIDStart()
+        {
+            return summaryStart;
+        }
+
+        public int getUUIDCount()
+        {
+            return summaryInfosCount;
         }
     }
 }
